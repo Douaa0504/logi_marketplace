@@ -1,0 +1,31 @@
+name: logi_marketplace
+description: "A professional Multi-Vendor E-Commerce platform build with Clean Architecture."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Core Infrastructure Backend & State Management
+  supabase_flutter: ^2.8.0
+  flutter_bloc: ^8.1.6
+  hive_flutter: ^1.1.0
+  flutter_dotenv: ^5.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Registering the environment configuration file securely
+  assets:
+    - .env
