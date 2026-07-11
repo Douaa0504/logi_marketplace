@@ -39,7 +39,7 @@ class LogiMarketplaceApp extends StatelessWidget {
       home: const Scaffold(
         body: Center(
           child: Text(
-            'LogiMarketplace: Environment Secured & Ready 🚀',
+            'LogiMarketplace: Environment Secured & Ready',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
