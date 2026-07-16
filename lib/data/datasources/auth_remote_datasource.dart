@@ -12,7 +12,7 @@ class AuthRemoteDataSource {
     required String fullName,
     required String role,
   }) async {
-    // 1. Create the user authentication record
+    // Create the user authentication record
     final AuthResponse response = await _supabaseClient.auth.signUp(
       email: email,
       password: password,
@@ -20,7 +20,7 @@ class AuthRemoteDataSource {
 
     final User? user = response.user;
 
-    // 2. Insert profile metadata into the public profiles table if auth succeeds
+    // Insert profile metadata into the public profiles table if auth succeeds
     if (user != null) {
       await _supabaseClient.from('profiles').insert({
         'id': user.id,
