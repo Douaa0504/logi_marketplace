@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/storage/app_storage.dart';
+import '../pages/buyer_home_page.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 
@@ -26,22 +27,22 @@ class _AuthPageState extends State<AuthPage> {
     super.dispose();
   }
 
-  // Handle successful authentication flow
   void _handleAuthSuccess(BuildContext context, AuthSuccess state) async {
-    // 1. Cache user role in local storage
     await AppStorage().saveUserRole(state.role);
 
     if (!mounted) return;
 
-    // 2. Clear routing stack and direct user to their respective workflow
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Welcome back, ${state.user.email}!')),
     );
 
     if (state.role == 'seller') {
-      // Route to Seller Dashboard
+      // TODO: Seller Dashboard (Day 8)
     } else {
-      // Route to Buyer Home
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const BuyerHomePage()),
+      );
     }
   }
 
@@ -69,8 +70,8 @@ class _AuthPageState extends State<AuthPage> {
               selectedRole = state.selectedRole;
             }
 
-            // Dynamically change colors based on chosen user role
-            final themeColor = selectedRole == 'seller' ? Colors.blueGrey[800]! : Colors.indigo;
+            final themeColor =
+            selectedRole == 'seller' ? Colors.blueGrey[800]! : Colors.indigo;
 
             return Center(
               child: SingleChildScrollView(
@@ -91,8 +92,6 @@ class _AuthPageState extends State<AuthPage> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),
-
-                      // Custom Toggle Switch for Role Selection (Buyer / Seller)
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
@@ -102,18 +101,24 @@ class _AuthPageState extends State<AuthPage> {
                           children: [
                             Expanded(
                               child: GestureDetector(
-                                onTap: () => context.read<AuthCubit>().toggleRole('buyer'),
+                                onTap: () =>
+                                    context.read<AuthCubit>().toggleRole('buyer'),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  padding:
+                                  const EdgeInsets.symmetric(vertical: 12),
                                   decoration: BoxDecoration(
-                                    color: selectedRole == 'buyer' ? Colors.indigo : Colors.transparent,
+                                    color: selectedRole == 'buyer'
+                                        ? Colors.indigo
+                                        : Colors.transparent,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
                                     'Buyer',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      color: selectedRole == 'buyer' ? Colors.white : Colors.grey[600],
+                                      color: selectedRole == 'buyer'
+                                          ? Colors.white
+                                          : Colors.grey[600],
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -122,18 +127,24 @@ class _AuthPageState extends State<AuthPage> {
                             ),
                             Expanded(
                               child: GestureDetector(
-                                onTap: () => context.read<AuthCubit>().toggleRole('seller'),
+                                onTap: () =>
+                                    context.read<AuthCubit>().toggleRole('seller'),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  padding:
+                                  const EdgeInsets.symmetric(vertical: 12),
                                   decoration: BoxDecoration(
-                                    color: selectedRole == 'seller' ? Colors.blueGrey[800] : Colors.transparent,
+                                    color: selectedRole == 'seller'
+                                        ? Colors.blueGrey[800]
+                                        : Colors.transparent,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
                                     'Seller',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      color: selectedRole == 'seller' ? Colors.white : Colors.grey[600],
+                                      color: selectedRole == 'seller'
+                                          ? Colors.white
+                                          : Colors.grey[600],
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -144,8 +155,6 @@ class _AuthPageState extends State<AuthPage> {
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Conditionally show Full Name field for registration
                       if (_isSignUp) ...[
                         TextFormField(
                           controller: _nameController,
@@ -154,11 +163,11 @@ class _AuthPageState extends State<AuthPage> {
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.person_outline),
                           ),
-                          validator: (value) => value!.isEmpty ? 'Enter your full name' : null,
+                          validator: (value) =>
+                          value!.isEmpty ? 'Enter your full name' : null,
                         ),
                         const SizedBox(height: 16),
                       ],
-
                       TextFormField(
                         controller: _emailController,
                         decoration: const InputDecoration(
@@ -167,10 +176,10 @@ class _AuthPageState extends State<AuthPage> {
                           prefixIcon: Icon(Icons.email_outlined),
                         ),
                         keyboardType: TextInputType.emailAddress,
-                        validator: (value) => value!.isEmpty ? 'Enter a valid email' : null,
+                        validator: (value) =>
+                        value!.isEmpty ? 'Enter a valid email' : null,
                       ),
                       const SizedBox(height: 16),
-
                       TextFormField(
                         controller: _passwordController,
                         decoration: const InputDecoration(
@@ -179,10 +188,10 @@ class _AuthPageState extends State<AuthPage> {
                           prefixIcon: Icon(Icons.lock_outline),
                         ),
                         obscureText: true,
-                        validator: (value) => value!.length < 6 ? 'Password must be 6+ characters' : null,
+                        validator: (value) =>
+                        value!.length < 6 ? 'Password must be 6+ characters' : null,
                       ),
                       const SizedBox(height: 24),
-
                       if (state is AuthLoading)
                         const Center(child: CircularProgressIndicator())
                       else
@@ -213,9 +222,7 @@ class _AuthPageState extends State<AuthPage> {
                           ),
                           child: Text(_isSignUp ? 'Sign Up' : 'Sign In'),
                         ),
-
                       const SizedBox(height: 16),
-
                       TextButton(
                         onPressed: () => setState(() => _isSignUp = !_isSignUp),
                         child: Text(

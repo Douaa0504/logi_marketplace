@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/storage/app_storage.dart';
+import '../pages/buyer_home_page.dart';
 import 'auth_page.dart';
 
 class SplashPage extends StatefulWidget {
@@ -17,9 +18,7 @@ class _SplashPageState extends State<SplashPage> {
     _checkSession();
   }
 
-  // Check the active session and route the user accordingly
   void _checkSession() async {
-    // Artificial delay for splash brand presentation
     await Future.delayed(const Duration(seconds: 2));
 
     final session = Supabase.instance.client.auth.currentSession;
@@ -27,11 +26,9 @@ class _SplashPageState extends State<SplashPage> {
     if (!mounted) return;
 
     if (session != null) {
-      // User is logged in, retrieve their role from Hive local storage
       final role = AppStorage().getUserRole();
       _navigateToHome(role);
     } else {
-      // No active session, send to login screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const AuthPage()),
@@ -41,9 +38,12 @@ class _SplashPageState extends State<SplashPage> {
 
   void _navigateToHome(String? role) {
     if (role == 'seller') {
-      // TODO: Navigate to Seller Dashboard (Day 8)
+      // TODO: Route to Seller Dashboard
     } else {
-      // TODO: Navigate to Buyer Home Screen (Day 5)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const BuyerHomePage()),
+      );
     }
   }
 
