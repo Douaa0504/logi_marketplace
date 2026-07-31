@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/storage/app_storage.dart';
-import '../pages/buyer_home_page.dart';
+import '../../../core/storage/app_storage.dart';
 import 'auth_page.dart';
+import '../../buyer/home/buyer_home_page.dart';
+import 'add_product_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -15,63 +16,69 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    _checkSession();
+    _checkAuth();
   }
 
-  void _checkSession() async {
+  Future<void> _checkAuth() async {
     await Future.delayed(const Duration(seconds: 2));
-
-    final session = Supabase.instance.client.auth.currentSession;
-
     if (!mounted) return;
 
-    if (session != null) {
-      final role = AppStorage().getUserRole();
-      _navigateToHome(role);
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AuthPage()),
-      );
-    }
-  }
+    try {
+      final session = Supabase.instance.client.auth.currentSession;
+      if (session != null) {
+        final role = AppStorage().getUserRole();
+        if (!mounted) return;
 
-  void _navigateToHome(String? role) {
-    if (role == 'seller') {
-      // TODO: Route to Seller Dashboard
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const BuyerHomePage()),
-      );
+        if (role == 'seller') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const AddProductPage()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const BuyerHomePage()),
+          );
+        }
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AuthPage()),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AuthPage()),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Colors.indigo,
+      backgroundColor: Color(0xFFF8FAFC),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.shopping_bag_outlined,
-              size: 80,
-              color: Colors.white,
-            ),
-            SizedBox(height: 16),
+            Icon(Icons.shopping_bag_rounded, size: 80, color: Color(0xFF2563EB)),
+            SizedBox(height: 24),
             Text(
-              'LogiMarketplace',
+              'LogiMarket',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Color(0xFF0F172A),
+                letterSpacing: -0.5,
               ),
             ),
-            SizedBox(height: 24),
+            SizedBox(height: 16),
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              color: Color(0xFF2563EB),
+              strokeWidth: 3,
             ),
           ],
         ),

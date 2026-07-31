@@ -15,4 +15,11 @@ class ProductRepositoryImpl implements ProductRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> addProduct(ProductEntity product) {
+    // TODO: implement addProduct
+    throw UnimplementedError();
+  }
+  
 }

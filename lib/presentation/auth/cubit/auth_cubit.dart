@@ -1,20 +1,27 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/storage/app_storage.dart';
 import '../../../domain/repositories/auth_repository.dart';
+import '../../../domain/usecases/sign_in_usecase.dart';
+import '../../../domain/usecases/sign_up_usecase.dart';
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  final AuthRepository _authRepository;
+  final SignInUseCase signInUseCase;
+  final SignUpUseCase signUpUseCase;
+  final AuthRepository authRepository;
   String _currentRole = 'buyer';
 
-  AuthCubit(this._authRepository) : super(AuthInitial());
+  AuthCubit({
+    required this.signInUseCase,
+    required this.signUpUseCase,
+    required this.authRepository,
+  }) : super(AuthInitial());
 
-  // Toggle role dynamically inside the login/register screen without full reload
   void toggleRole(String newRole) {
     _currentRole = newRole;
     emit(AuthInitial(selectedRole: _currentRole));
   }
 
-  // Execute registration logic
   Future<void> registerUser({
     required String email,
     required String password,
@@ -22,7 +29,7 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(AuthLoading());
     try {
-      final user = await _authRepository.signUp(
+      final user = await signUpUseCase(
         email: email,
         password: password,
         fullName: fullName,
@@ -30,6 +37,7 @@ class AuthCubit extends Cubit<AuthState> {
       );
 
       if (user != null) {
+        await AppStorage().saveUserRole(_currentRole);
         emit(AuthSuccess(user: user, role: _currentRole));
       } else {
         emit(AuthFailure(message: 'Registration failed: Unknown error'));
@@ -39,24 +47,35 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // Execute login logic and fetch database role
   Future<void> loginUser({
     required String email,
     required String password,
   }) async {
     emit(AuthLoading());
     try {
-      final user = await _authRepository.signIn(
+      final user = await signInUseCase(
         email: email,
         password: password,
       );
 
       if (user != null) {
-        final role = await _authRepository.getUserRole(user.id);
-        emit(AuthSuccess(user: user, role: role ?? 'buyer'));
+        final role = await authRepository.getUserRole(user.id);
+        final finalRole = role ?? 'buyer';
+        await AppStorage().saveUserRole(finalRole);
+        emit(AuthSuccess(user: user, role: finalRole));
       } else {
         emit(AuthFailure(message: 'Login failed: User record empty'));
       }
+    } catch (e) {
+      emit(AuthFailure(message: e.toString()));
+    }
+  }
+
+  Future<void> signOut() async {
+    try {
+      await authRepository.signOut();
+      await AppStorage().clearAuthData();
+      emit(AuthInitial(selectedRole: 'buyer'));
     } catch (e) {
       emit(AuthFailure(message: e.toString()));
     }

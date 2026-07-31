@@ -1,18 +1,35 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class AuthRemoteDataSource {
+abstract class AuthRemoteDataSource {
+  Future<User?> signUp({
+    required String email,
+    required String password,
+    required String fullName,
+    required String role,
+  });
+
+  Future<User?> signIn({
+    required String email,
+    required String password,
+  });
+
+  Future<void> signOut();
+
+  Future<String?> getUserRole(String userId);
+}
+
+class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final SupabaseClient _supabaseClient;
 
-  AuthRemoteDataSource(this._supabaseClient);
+  AuthRemoteDataSourceImpl(this._supabaseClient);
 
-  // Direct API call to Supabase Auth and subsequent profile creation
+  @override
   Future<User?> signUp({
     required String email,
     required String password,
     required String fullName,
     required String role,
   }) async {
-    // Create the user authentication record
     final AuthResponse response = await _supabaseClient.auth.signUp(
       email: email,
       password: password,
@@ -20,7 +37,6 @@ class AuthRemoteDataSource {
 
     final User? user = response.user;
 
-    // Insert profile metadata into the public profiles table if auth succeeds
     if (user != null) {
       await _supabaseClient.from('profiles').insert({
         'id': user.id,
@@ -32,7 +48,7 @@ class AuthRemoteDataSource {
     return user;
   }
 
-  // Direct API call to authenticate existing users
+  @override
   Future<User?> signIn({
     required String email,
     required String password,
@@ -44,7 +60,12 @@ class AuthRemoteDataSource {
     return response.user;
   }
 
-  // Retrieve the stored database role for a specific user ID
+  @override
+  Future<void> signOut() async {
+    await _supabaseClient.auth.signOut();
+  }
+
+  @override
   Future<String?> getUserRole(String userId) async {
     final data = await _supabaseClient
         .from('profiles')

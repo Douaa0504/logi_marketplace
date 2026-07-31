@@ -14,17 +14,12 @@ class AuthRepositoryImpl implements AuthRepository {
     required String fullName,
     required String role,
   }) async {
-    try {
-      return await _remoteDataSource.signUp(
-        email: email,
-        password: password,
-        fullName: fullName,
-        role: role,
-      );
-    } catch (e) {
-      // Re-throw or handle custom formatting later
-      rethrow;
-    }
+    return await _remoteDataSource.signUp(
+      email: email,
+      password: password,
+      fullName: fullName,
+      role: role,
+    );
   }
 
   @override
@@ -32,22 +27,19 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    try {
-      return await _remoteDataSource.signIn(
-        email: email,
-        password: password,
-      );
-    } catch (e) {
-      rethrow;
-    }
+    return await _remoteDataSource.signIn(
+      email: email,
+      password: password,
+    );
+  }
+
+  @override
+  Future<void> signOut() async {
+    await _remoteDataSource.signOut();
   }
 
   @override
   Future<String?> getUserRole(String userId) async {
-    try {
-      return await _remoteDataSource.getUserRole(userId);
-    } catch (e) {
-      rethrow;
-    }
+    return await _remoteDataSource.getUserRole(userId);
   }
 }

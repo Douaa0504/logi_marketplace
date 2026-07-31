@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/storage/app_storage.dart';
 import '../pages/buyer_home_page.dart';
+import '../../seller/dashboard/seller_dashboard_page.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
+import '../../shared/custom_text_field.dart';
+import '../../shared/primary_button.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -18,6 +21,11 @@ class _AuthPageState extends State<AuthPage> {
   final _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isSignUp = false;
+  String _selectedRole = 'buyer';
+
+  static const Color primaryBlue = Color(0xFF2563EB);
+  static const Color sellerDark = Color(0xFF1E293B);
+  static const Color lightBackground = Color(0xFFF8FAFC);
 
   @override
   void dispose() {
@@ -33,11 +41,26 @@ class _AuthPageState extends State<AuthPage> {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Welcome back, ${state.user.email}!')),
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white, size: 20),
+            const SizedBox(width: 12),
+            Text('Welcome back, ${state.user.email}!'),
+          ],
+        ),
+        backgroundColor: Colors.green[600],
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
 
     if (state.role == 'seller') {
-      // TODO: Seller Dashboard (Day 8)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const SellerDashboardPage()),
+      );
     } else {
       Navigator.pushReplacement(
         context,
@@ -48,8 +71,10 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
+    final activeColor = _selectedRole == 'seller' ? sellerDark : primaryBlue;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: lightBackground,
       body: SafeArea(
         child: BlocConsumer<AuthCubit, AuthState>(
           listener: (context, state) {
@@ -59,178 +84,148 @@ class _AuthPageState extends State<AuthPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: Colors.red,
+                  backgroundColor: Colors.red[600],
+                  behavior: SnackBarBehavior.floating,
+                  margin: const EdgeInsets.all(16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               );
             }
           },
           builder: (context, state) {
-            String selectedRole = 'buyer';
             if (state is AuthInitial) {
-              selectedRole = state.selectedRole;
+              _selectedRole = state.selectedRole;
             }
-
-            final themeColor =
-            selectedRole == 'seller' ? Colors.blueGrey[800]! : Colors.indigo;
 
             return Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Animated Logo Container
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 500),
+                        height: 80,
+                        width: 80,
+                        decoration: BoxDecoration(
+                          color: activeColor.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _selectedRole == 'seller' ? Icons.storefront_rounded : Icons.shopping_bag_rounded,
+                          size: 42,
+                          color: activeColor,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                       Text(
                         _isSignUp ? 'Create Account' : 'Welcome Back',
-                        style: TextStyle(
-                          fontSize: 28,
+                        style: const TextStyle(
+                          fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: themeColor,
+                          color: Color(0xFF0F172A),
+                          letterSpacing: -1,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _isSignUp
+                            ? 'Join LogiMarket and start your journey'
+                            : 'Sign in to access your curated marketplace',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF64748B),
                         ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),
+                      // Modern Segmented Role Picker
                       Container(
+                        padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
+                          color: const Color(0xFFE2E8F0),
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () =>
-                                    context.read<AuthCubit>().toggleRole('buyer'),
-                                child: Container(
-                                  padding:
-                                  const EdgeInsets.symmetric(vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: selectedRole == 'buyer'
-                                        ? Colors.indigo
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    'Buyer',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: selectedRole == 'buyer'
-                                          ? Colors.white
-                                          : Colors.grey[600],
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () =>
-                                    context.read<AuthCubit>().toggleRole('seller'),
-                                child: Container(
-                                  padding:
-                                  const EdgeInsets.symmetric(vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: selectedRole == 'seller'
-                                        ? Colors.blueGrey[800]
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    'Seller',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: selectedRole == 'seller'
-                                          ? Colors.white
-                                          : Colors.grey[600],
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            _buildRoleTab('Buyer', 'buyer', activeColor),
+                            _buildRoleTab('Seller', 'seller', activeColor),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                       if (_isSignUp) ...[
-                        TextFormField(
+                        CustomTextField(
                           controller: _nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Full Name',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.person_outline),
-                          ),
-                          validator: (value) =>
-                          value!.isEmpty ? 'Enter your full name' : null,
+                          label: 'Full Name',
+                          prefixIcon: Icons.person_outline_rounded,
+                          validator: (val) => val == null || val.isEmpty ? 'Please enter your name' : null,
                         ),
                         const SizedBox(height: 16),
                       ],
-                      TextFormField(
+                      CustomTextField(
                         controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email Address',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.email_outlined),
-                        ),
+                        label: 'Email Address',
+                        prefixIcon: Icons.email_outlined,
                         keyboardType: TextInputType.emailAddress,
-                        validator: (value) =>
-                        value!.isEmpty ? 'Enter a valid email' : null,
+                        validator: (val) => val == null || !val.contains('@') ? 'Enter a valid email' : null,
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
+                      CustomTextField(
                         controller: _passwordController,
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.lock_outline),
-                        ),
-                        obscureText: true,
-                        validator: (value) =>
-                        value!.length < 6 ? 'Password must be 6+ characters' : null,
+                        label: 'Password',
+                        prefixIcon: Icons.lock_outline_rounded,
+                        isPassword: true,
+                        validator: (val) => val == null || val.length < 6 ? 'Min 6 characters required' : null,
+                      ),
+                      const SizedBox(height: 32),
+                      PrimaryButton(
+                        label: _isSignUp ? 'Create Account' : 'Sign In',
+                        isLoading: state is AuthLoading,
+                        color: activeColor,
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            if (_isSignUp) {
+                              context.read<AuthCubit>().registerUser(
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text.trim(),
+                                fullName: _nameController.text.trim(),
+                              );
+                            } else {
+                              context.read<AuthCubit>().loginUser(
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text.trim(),
+                              );
+                            }
+                          }
+                        },
                       ),
                       const SizedBox(height: 24),
-                      if (state is AuthLoading)
-                        const Center(child: CircularProgressIndicator())
-                      else
-                        ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              if (_isSignUp) {
-                                context.read<AuthCubit>().registerUser(
-                                  email: _emailController.text.trim(),
-                                  password: _passwordController.text.trim(),
-                                  fullName: _nameController.text.trim(),
-                                );
-                              } else {
-                                context.read<AuthCubit>().loginUser(
-                                  email: _emailController.text.trim(),
-                                  password: _passwordController.text.trim(),
-                                );
-                              }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: themeColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _isSignUp ? 'Already have an account? ' : "Don't have an account? ",
+                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                          ),
+                          GestureDetector(
+                            onTap: () => setState(() => _isSignUp = !_isSignUp),
+                            child: Text(
+                              _isSignUp ? 'Sign In' : 'Sign Up',
+                              style: TextStyle(
+                                color: activeColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
-                          child: Text(_isSignUp ? 'Sign Up' : 'Sign In'),
-                        ),
-                      const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () => setState(() => _isSignUp = !_isSignUp),
-                        child: Text(
-                          _isSignUp
-                              ? 'Already have an account? Sign In'
-                              : 'Don\'t have an account? Sign Up',
-                          style: TextStyle(color: themeColor),
-                        ),
+                        ],
                       ),
                     ],
                   ),
@@ -238,6 +233,43 @@ class _AuthPageState extends State<AuthPage> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoleTab(String label, String role, Color activeColor) {
+    final isSelected = _selectedRole == role;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() => _selectedRole = role);
+          context.read<AuthCubit>().toggleRole(role);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    )
+                  ]
+                : [],
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? activeColor : const Color(0xFF64748B),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ),
     );
