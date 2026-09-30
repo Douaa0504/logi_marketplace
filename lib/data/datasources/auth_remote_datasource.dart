@@ -1,78 +1,74 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<User?> signUp({
+  Future<AuthResponse> signUp({
     required String email,
     required String password,
     required String fullName,
     required String role,
   });
 
-  Future<User?> signIn({
+  Future<AuthResponse> signIn({
     required String email,
     required String password,
   });
 
   Future<void> signOut();
-
-  Future<String?> getUserRole(String userId);
+  User? getCurrentUser();
+  Future<Map<String, dynamic>?> getUserProfile(String uid);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final SupabaseClient _supabaseClient;
+  final SupabaseClient supabaseClient;
 
-  AuthRemoteDataSourceImpl(this._supabaseClient);
+  AuthRemoteDataSourceImpl({required this.supabaseClient});
 
   @override
-  Future<User?> signUp({
+  Future<AuthResponse> signUp({
     required String email,
     required String password,
     required String fullName,
     required String role,
   }) async {
-    final AuthResponse response = await _supabaseClient.auth.signUp(
+    // نمرر البيانات في data لكي يستقبلها Trigger الخاص بـ Supabase
+    return await supabaseClient.auth.signUp(
       email: email,
       password: password,
-    );
-
-    final User? user = response.user;
-
-    if (user != null) {
-      await _supabaseClient.from('profiles').insert({
-        'id': user.id,
+      data: {
         'full_name': fullName,
         'role': role,
-        'updated_at': DateTime.now().toIso8601String(),
-      });
-    }
-    return user;
+      },
+    );
   }
 
   @override
-  Future<User?> signIn({
+  Future<AuthResponse> signIn({
     required String email,
     required String password,
   }) async {
-    final AuthResponse response = await _supabaseClient.auth.signInWithPassword(
+    return await supabaseClient.auth.signInWithPassword(
       email: email,
       password: password,
     );
-    return response.user;
   }
 
   @override
   Future<void> signOut() async {
-    await _supabaseClient.auth.signOut();
+    await supabaseClient.auth.signOut();
   }
 
   @override
-  Future<String?> getUserRole(String userId) async {
-    final data = await _supabaseClient
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .single();
+  User? getCurrentUser() {
+    return supabaseClient.auth.currentUser;
+  }
 
-    return data['role'] as String?;
+  @override
+  Future<Map<String, dynamic>?> getUserProfile(String uid) async {
+    final response = await supabaseClient
+        .from('profiles')
+        .select()
+        .eq('id', uid)
+        .maybeSingle();
+    return response;
   }
 }

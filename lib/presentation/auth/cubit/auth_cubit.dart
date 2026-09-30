@@ -26,6 +26,7 @@ class AuthCubit extends Cubit<AuthState> {
     required String email,
     required String password,
     required String fullName,
+    required String role,
   }) async {
     emit(AuthLoading());
     try {
@@ -33,12 +34,12 @@ class AuthCubit extends Cubit<AuthState> {
         email: email,
         password: password,
         fullName: fullName,
-        role: _currentRole,
+        role: role,
       );
 
       if (user != null) {
-        await AppStorage().saveUserRole(_currentRole);
-        emit(AuthSuccess(user: user, role: _currentRole));
+        await AppStorage().saveUserRole(role);
+        emit(AuthSuccess(user: user, role: role));
       } else {
         emit(AuthFailure(message: 'Registration failed: Unknown error'));
       }
@@ -59,7 +60,8 @@ class AuthCubit extends Cubit<AuthState> {
       );
 
       if (user != null) {
-        final role = await authRepository.getUserRole(user.id);
+        // تم تصحيح هذا السطر: الاستدعاء بدون وسائط لأنgetUserRole() تعتمد على المستخدم الجاري محلياً
+        final role = await authRepository.getUserRole();
         final finalRole = role ?? 'buyer';
         await AppStorage().saveUserRole(finalRole);
         emit(AuthSuccess(user: user, role: finalRole));
@@ -74,10 +76,11 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> signOut() async {
     try {
       await authRepository.signOut();
+    } catch (e) {
+      // Ignore remote errors to ensure local state is cleared
+    } finally {
       await AppStorage().clearAuthData();
       emit(AuthInitial(selectedRole: 'buyer'));
-    } catch (e) {
-      emit(AuthFailure(message: e.toString()));
     }
   }
 }

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../core/storage/app_storage.dart';
-import 'auth_page.dart';
-import '../../buyer/home/buyer_home_page.dart';
-import 'add_product_page.dart';
+import 'package:logi_marketplace/presentation/auth/pages/auth_page.dart';
+import 'package:logi_marketplace/presentation/buyer/home/view/buyer_home_page.dart';
+import 'package:logi_marketplace/presentation/seller/dashboard/seller_dashboard_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -16,37 +15,60 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    _checkAuth();
+    _init();
   }
 
-  Future<void> _checkAuth() async {
+  Future<void> _init() async {
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
 
     try {
-      final session = Supabase.instance.client.auth.currentSession;
-      if (session != null) {
-        final role = AppStorage().getUserRole();
-        if (!mounted) return;
+      final supabase = Supabase.instance.client;
+      final session = supabase.auth.currentSession;
+      final user = supabase.auth.currentUser;
 
-        if (role == 'seller') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const AddProductPage()),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const BuyerHomePage()),
-          );
-        }
-      } else {
+      debugPrint("DEBUG_AUTH: Session = ${session != null}, User = ${user?.id}");
+
+      if (session == null || user == null) {
+        debugPrint("DEBUG_AUTH: No active user, redirecting to AuthPage");
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const AuthPage()),
         );
+        return;
       }
-    } catch (_) {
+
+      // Fetch profile role directly from Supabase
+      debugPrint("DEBUG_AUTH: Fetching role for user ${user.id}...");
+      final response = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      debugPrint("DEBUG_AUTH: DB Profile Response = $response");
+
+      final String? role = response?['role']?.toString();
+      debugPrint("DEBUG_AUTH: Extracted Role = '$role'");
+
+      if (!mounted) return;
+
+      if (role == 'seller') {
+        debugPrint("DEBUG_AUTH: SUCCESS -> NAVIGATING TO SELLER DASHBOARD!");
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const SellerDashboardPage()),
+        );
+      } else {
+        debugPrint("DEBUG_AUTH: NAVIGATING TO BUYER HOME!");
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const BuyerHomePage()),
+        );
+      }
+    } catch (e, stack) {
+      debugPrint("DEBUG_AUTH ERROR: $e");
+      debugPrint(stack.toString());
       if (mounted) {
         Navigator.pushReplacement(
           context,

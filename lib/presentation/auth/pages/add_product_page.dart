@@ -1,7 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../domain/entities/product_entity.dart';
 import '../cubit/product_cubit.dart';
 import '../cubit/product_state.dart';
 
@@ -17,44 +18,52 @@ class _AddProductPageState extends State<AddProductPage> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
-  final _imageUrlController = TextEditingController();
 
   String _selectedCategory = 'Electronics';
+  File? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
 
   final List<String> _categories = [
     'Electronics',
-    'Fashion',
+    'Clothing',
     'Home',
-    'Gaming',
-    'Books',
+    'Beauty',
+    'Sports',
     'Other'
   ];
 
-  void _onPublishPressed() {
+  Future<void> _pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  void _submitProduct() {
     if (!_formKey.currentState!.validate()) return;
 
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) {
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('User not authenticated')),
       );
       return;
     }
 
-    final product = ProductEntity(
-      id: '', // Supabase will auto-generate
-      sellerId: user.id,
+    context.read<ProductCubit>().addProduct(
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       price: double.parse(_priceController.text.trim()),
       category: _selectedCategory,
-      imageUrl: _imageUrlController.text.trim().isNotEmpty
-          ? _imageUrlController.text.trim()
-          : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=500',
-      createdAt: DateTime.now(),
+      sellerId: currentUser.id,
+      imageFile: _selectedImage,
     );
-
-    context.read<ProductCubit>().addProduct(product);
   }
 
   @override
@@ -62,7 +71,6 @@ class _AddProductPageState extends State<AddProductPage> {
     _titleController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
-    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -71,118 +79,108 @@ class _AddProductPageState extends State<AddProductPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add New Product'),
-        backgroundColor: const Color(0xFF3F51B5),
-        foregroundColor: Colors.white,
       ),
       body: BlocListener<ProductCubit, ProductState>(
         listener: (context, state) {
-          if (state is ProductAddedSuccess) {
+          if (state is ProductSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Product added successfully!'),
-                backgroundColor: Colors.green,
-              ),
+              const SnackBar(content: Text('Product added successfully!')),
             );
             Navigator.pop(context, true);
-          } else if (state is ProductError) {
+          } else if (state is ProductFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error: ${state.message}'),
-                backgroundColor: Colors.red,
-              ),
+              SnackBar(content: Text('Error: ${state.message}')),
             );
           }
         },
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
-            child: ListView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: Container(
+                    height: 180,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey[400]!),
+                    ),
+                    child: _selectedImage != null
+                        ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(_selectedImage!, fit: BoxFit.cover),
+                    )
+                        : const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
+                        SizedBox(height: 8),
+                        Text('Tap to select product image'),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _titleController,
                   decoration: const InputDecoration(
                     labelText: 'Product Title',
                     border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.title),
                   ),
-                  validator: (val) =>
-                      val == null || val.isEmpty ? 'Please enter a title' : null,
+                  validator: (v) => v == null || v.isEmpty ? 'Title is required' : null,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _priceController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: 'Price (\$)',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Price is required';
+                    if (double.tryParse(v) == null) return 'Enter a valid number';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedCategory,
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: _categories
+                      .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
+                      .toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedCategory = val);
+                  },
+                ),
+                const SizedBox(height: 12),
                 TextFormField(
                   controller: _descriptionController,
                   maxLines: 3,
                   decoration: const InputDecoration(
                     labelText: 'Description',
                     border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.description),
-                  ),
-                  validator: (val) => val == null || val.isEmpty
-                      ? 'Please enter a description'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _priceController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText: 'Price',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.attach_money),
-                  ),
-                  validator: (val) {
-                    if (val == null || val.isEmpty) return 'Please enter price';
-                    if (double.tryParse(val) == null) return 'Invalid number';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedCategory,
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.category),
-                  ),
-                  items: _categories.map((cat) {
-                    return DropdownMenuItem(value: cat, child: Text(cat));
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) setState(() => _selectedCategory = val);
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _imageUrlController,
-                  decoration: const InputDecoration(
-                    labelText: 'Image URL (Optional)',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.image),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 BlocBuilder<ProductCubit, ProductState>(
                   builder: (context, state) {
-                    final isLoading = state is ProductLoading;
                     return ElevatedButton(
-                      onPressed: isLoading ? null : _onPublishPressed,
+                      onPressed: state is ProductLoading ? null : _submitProduct,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3F51B5),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2),
-                            )
-                          : const Text(
-                              'Publish Product',
-                              style: TextStyle(fontSize: 16, color: Colors.white),
-                            ),
+                      child: state is ProductLoading
+                          ? const CircularProgressIndicator()
+                          : const Text('Publish Product', style: TextStyle(fontSize: 16)),
                     );
                   },
                 ),

@@ -3,9 +3,9 @@ import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource _remoteDataSource;
+  final AuthRemoteDataSource remoteDataSource;
 
-  AuthRepositoryImpl(this._remoteDataSource);
+  AuthRepositoryImpl({required this.remoteDataSource});
 
   @override
   Future<User?> signUp({
@@ -14,12 +14,13 @@ class AuthRepositoryImpl implements AuthRepository {
     required String fullName,
     required String role,
   }) async {
-    return await _remoteDataSource.signUp(
+    final response = await remoteDataSource.signUp(
       email: email,
       password: password,
       fullName: fullName,
       role: role,
     );
+    return response.user;
   }
 
   @override
@@ -27,19 +28,23 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    return await _remoteDataSource.signIn(
+    final response = await remoteDataSource.signIn(
       email: email,
       password: password,
     );
+    return response.user;
   }
 
   @override
   Future<void> signOut() async {
-    await _remoteDataSource.signOut();
+    await remoteDataSource.signOut();
   }
 
   @override
-  Future<String?> getUserRole(String userId) async {
-    return await _remoteDataSource.getUserRole(userId);
+  Future<String?> getUserRole() async {
+    final user = remoteDataSource.getCurrentUser();
+    if (user == null) return null;
+    final profile = await remoteDataSource.getUserProfile(user.id);
+    return profile?['role'] as String?;
   }
 }

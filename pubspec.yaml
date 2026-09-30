@@ -10,14 +10,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  image_picker: ^1.1.2
   http: ^1.6.0
   cupertino_icons: ^1.0.8
+  equatable: ^2.0.5
 
   # Core Infrastructure Backend & State Management
   supabase_flutter: ^2.8.0
   flutter_bloc: ^8.1.6
   hive_flutter: ^1.1.0
   flutter_dotenv: ^5.2.1
+  meta: ^1.17.0
 
 dev_dependencies:
   flutter_test:

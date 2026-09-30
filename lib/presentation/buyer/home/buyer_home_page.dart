@@ -105,8 +105,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
               const SizedBox(height: 16),
               _buildSearchBar(),
               const SizedBox(height: 24),
-              _buildPromoCarousel(),
-              const SizedBox(height: 24),
               _buildSectionHeader('Categories'),
               const SizedBox(height: 12),
               _buildCategories(),
@@ -157,15 +155,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
             IconButton(
               onPressed: () {},
               icon: const Icon(Icons.notifications_outlined, color: Color(0xFF0F172A)),
-            ),
-            Positioned(
-              top: 12,
-              right: 12,
-              child: Container(
-                height: 8,
-                width: 8,
-                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-              ),
             ),
           ],
         ),
@@ -224,35 +213,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
             ),
             child: const Icon(Icons.tune_rounded, color: Colors.white),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPromoCarousel() {
-    return Container(
-      height: 170,
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2563EB), Color(0xFF4F46E5)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -30,
-            bottom: -30,
-            child: Icon(
-              Icons.rocket_launch_rounded,
-              size: 200,
-              color: Colors.white.withValues(alpha: 0.1),
-            ),
-          ),
-
         ],
       ),
     );

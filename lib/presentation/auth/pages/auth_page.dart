@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/storage/app_storage.dart';
-import '../pages/buyer_home_page.dart';
-import '../../seller/dashboard/seller_dashboard_page.dart';
-import '../cubit/auth_cubit.dart';
-import '../cubit/auth_state.dart';
-import '../../shared/custom_text_field.dart';
-import '../../shared/primary_button.dart';
+
+// Navigation & Storage
+import 'package:logi_marketplace/core/navigation/app_router.dart'; // <--- هادي هي لي كانت ناقصة
+import 'package:logi_marketplace/core/storage/app_storage.dart';
+
+// Cubit & States
+import 'package:logi_marketplace/presentation/auth/cubit/auth_cubit.dart';
+import 'package:logi_marketplace/presentation/auth/cubit/auth_state.dart';
+
+// Shared Widgets
+import 'package:logi_marketplace/presentation/shared/custom_text_field.dart';
+import 'package:logi_marketplace/presentation/shared/primary_button.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -56,17 +61,8 @@ class _AuthPageState extends State<AuthPage> {
       ),
     );
 
-    if (state.role == 'seller') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const SellerDashboardPage()),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const BuyerHomePage()),
-      );
-    }
+    if (!mounted) return;
+    await AppRouter.routeUser(context);
   }
 
   @override
@@ -107,7 +103,6 @@ class _AuthPageState extends State<AuthPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Animated Logo Container
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 500),
                         height: 80,
@@ -145,7 +140,6 @@ class _AuthPageState extends State<AuthPage> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),
-                      // Modern Segmented Role Picker
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
@@ -192,10 +186,12 @@ class _AuthPageState extends State<AuthPage> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             if (_isSignUp) {
+
                               context.read<AuthCubit>().registerUser(
                                 email: _emailController.text.trim(),
                                 password: _passwordController.text.trim(),
                                 fullName: _nameController.text.trim(),
+                                role: _selectedRole,
                               );
                             } else {
                               context.read<AuthCubit>().loginUser(
@@ -254,12 +250,12 @@ class _AuthPageState extends State<AuthPage> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: isSelected
                 ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ]
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+            ]
                 : [],
           ),
           child: Text(
