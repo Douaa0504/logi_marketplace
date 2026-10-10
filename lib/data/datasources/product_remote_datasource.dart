@@ -14,6 +14,17 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
 
   ProductRemoteDataSourceImpl({required this.supabaseClient});
 
+  String _sanitizeStorageFileName(String rawValue) {
+    final sanitized = rawValue
+        .trim()
+        .replaceAll(RegExp(r'[\\/:*?"<>|]+'), '_')
+        .replaceAll(RegExp(r'\s+'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^[._]+|[._]+$'), '');
+
+    return sanitized.isEmpty ? 'product' : sanitized;
+  }
+
   @override
   Future<List<ProductModel>> getProducts() async {
     final response = await supabaseClient
@@ -21,7 +32,9 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
         .select()
         .order('created_at', ascending: false);
 
-    return (response as List).map((json) => ProductModel.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => ProductModel.fromJson(json))
+        .toList();
   }
 
   @override
@@ -37,7 +50,9 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
         .eq('seller_id', sellerId)
         .order('created_at', ascending: false);
 
-    return (response as List).map((json) => ProductModel.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => ProductModel.fromJson(json))
+        .toList();
   }
 
   @override
@@ -45,11 +60,17 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     String? imageUrl = product.imageUrl;
 
     if (imageFile != null) {
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${product.title.replaceAll(' ', '_')}.jpg';
+      final safeTitle = _sanitizeStorageFileName(product.title);
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}_$safeTitle.jpg';
       final path = 'products/$fileName';
 
-      await supabaseClient.storage.from('product-images').upload(path, imageFile);
-      imageUrl = supabaseClient.storage.from('product-images').getPublicUrl(path);
+      await supabaseClient.storage
+          .from('product-images')
+          .upload(path, imageFile);
+      imageUrl = supabaseClient.storage
+          .from('product-images')
+          .getPublicUrl(path);
     }
 
     final productData = product.toJson();

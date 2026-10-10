@@ -8,19 +8,35 @@ class ProductRepositoryImpl implements ProductRepository {
 
   ProductRepositoryImpl({required this.supabaseClient});
 
+  String _sanitizeStorageFileName(String rawValue) {
+    final sanitized = rawValue
+        .trim()
+        .replaceAll(RegExp(r'[\\/:*?"<>|]+'), '_')
+        .replaceAll(RegExp(r'\s+'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^[._]+|[._]+$'), '');
+
+    return sanitized.isEmpty ? 'product' : sanitized;
+  }
+
   @override
   Future<void> addProduct(ProductEntity product, [File? imageFile]) async {
     String? imageUrl;
 
     if (imageFile != null) {
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${product.sellerId}.jpg';
+      final safeName = _sanitizeStorageFileName(
+        product.title.isNotEmpty ? product.title : product.sellerId,
+      );
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_$safeName.jpg';
       final path = 'products/$fileName';
 
-      await supabaseClient.storage.from('products').upload(
-        path,
-        imageFile,
-        fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-      );
+      await supabaseClient.storage
+          .from('products')
+          .upload(
+            path,
+            imageFile,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+          );
 
       imageUrl = supabaseClient.storage.from('products').getPublicUrl(path);
     }

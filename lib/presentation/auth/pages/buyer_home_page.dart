@@ -38,7 +38,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.black54),
             onPressed: () {
-              // Sign out logic here
+
             },
           ),
         ],

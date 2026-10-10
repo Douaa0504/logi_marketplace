@@ -5,6 +5,8 @@ import '../../auth/cubit/product_state.dart';
 import '../../shared/category_chip.dart';
 import '../../shared/product_card.dart';
 import '../../shared/logout_icon_button.dart';
+import '../cart/cart_page.dart';
+import '../product_details/product_details_page.dart';
 
 class BuyerHomePage extends StatefulWidget {
   const BuyerHomePage({super.key});
@@ -32,9 +34,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         index: _selectedIndex,
         children: [
           _buildHomeContent(),
-          const Center(child: Text('Categories')),
-          const Center(child: Text('Cart')),
-          const Center(child: Text('Profile')),
+          _buildHomeContent(), // Explore Tab
+          const CartPage(),    // Real Cart Page Connected!
+          _buildProfileTab(),  // Buyer Profile Tab
         ],
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
@@ -54,40 +56,20 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         ],
       ),
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            onTap: (index) => setState(() => _selectedIndex = index),
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            selectedItemColor: const Color(0xFF2563EB),
-            unselectedItemColor: const Color(0xFF94A3B8),
-            showSelectedLabels: true,
-            showUnselectedLabels: true,
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_rounded),
-                activeIcon: Icon(Icons.home_rounded),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.grid_view_rounded),
-                label: 'Explore',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_cart_rounded),
-                label: 'Cart',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_rounded),
-                label: 'Profile',
-              ),
-            ],
-          ),
+        child: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: (index) => setState(() => _selectedIndex = index),
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedItemColor: const Color(0xFF2563EB),
+          unselectedItemColor: const Color(0xFF94A3B8),
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Explore'),
+            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_rounded), label: 'Cart'),
+            BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
+          ],
         ),
       ),
     );
@@ -126,40 +108,13 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
       backgroundColor: const Color(0xFFF8FAFC),
       elevation: 0,
       centerTitle: false,
-      title: Row(
-        children: [
-          const CircleAvatar(
-            radius: 20,
-            backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=buyer'),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Hello, welcome!',
-                style: TextStyle(color: Colors.grey[600], fontSize: 12, fontWeight: FontWeight.w500),
-              ),
-              const Text(
-                'Logi Customer',
-                style: TextStyle(color: Color(0xFF0F172A), fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ],
+      title: const Text(
+        'LogiMarket',
+        style: TextStyle(color: Color(0xFF0F172A), fontSize: 22, fontWeight: FontWeight.bold),
       ),
-      actions: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.notifications_outlined, color: Color(0xFF0F172A)),
-            ),
-          ],
-        ),
-        const LogoutIconButton(),
-        const SizedBox(width: 8),
+      actions: const [
+        LogoutIconButton(),
+        SizedBox(width: 8),
       ],
     );
   }
@@ -167,53 +122,27 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              height: 54,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.search_rounded, color: Color(0xFF64748B)),
-                  SizedBox(width: 12),
-                  Text(
-                    'Search products...',
-                    style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
-                  ),
-                ],
-              ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            height: 54,
-            width: 54,
-            decoration: BoxDecoration(
-              color: const Color(0xFF2563EB),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF2563EB).withValues(alpha: 0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.tune_rounded, color: Colors.white),
-          ),
-        ],
+          ],
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.search_rounded, color: Color(0xFF64748B)),
+            SizedBox(width: 12),
+            Text('Search products...', style: TextStyle(color: Color(0xFF64748B), fontSize: 14)),
+          ],
+        ),
       ),
     );
   }
@@ -221,18 +150,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('See All', style: TextStyle(color: Color(0xFF2563EB))),
-          ),
-        ],
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
       ),
     );
   }
@@ -277,16 +197,22 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              mainAxisSpacing: 20,
+              mainAxisSpacing: 16,
               crossAxisSpacing: 16,
               childAspectRatio: 0.72,
             ),
             itemCount: products.length,
             itemBuilder: (context, index) {
+              final product = products[index];
               return ProductCard(
-                product: products[index],
+                product: product,
                 onTap: () {
-                  // Navigate to details
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetailsPage(product: product),
+                    ),
+                  );
                 },
               );
             },
@@ -294,6 +220,25 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         }
         return const SizedBox();
       },
+    );
+  }
+
+  Widget _buildProfileTab() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.person, size: 80, color: Color(0xFF2563EB)),
+          const SizedBox(height: 16),
+          const Text('Customer Profile', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () => const LogoutIconButton(),
+            icon: const Icon(Icons.logout),
+            label: const Text('Logout'),
+          ),
+        ],
+      ),
     );
   }
 }
