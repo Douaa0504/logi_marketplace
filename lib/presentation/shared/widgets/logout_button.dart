@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logi_marketplace/core/navigation/app_router.dart';
 import 'package:logi_marketplace/presentation/auth/cubit/auth_cubit.dart';
-import 'package:logi_marketplace/presentation/auth/pages/auth_page.dart';
 
 class LogoutButton extends StatelessWidget {
   final bool isFullWidth;
@@ -68,14 +68,22 @@ class LogoutButton extends StatelessWidget {
               Navigator.pop(dialogContext);
               
               // 2. Perform sign out (clears Supabase + AppStorage)
-              await authCubit.signOut();
-              
-              // 3. Reset navigation stack cleanly to AuthPage
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const AuthPage()),
-                  (route) => false,
-                );
+              try {
+                await authCubit.signOut();
+
+                // 3. Reset navigation stack cleanly to AuthPage
+                if (context.mounted) {
+                  AppRouter.routeToAuth(context);
+                }
+              } catch (error) {
+                debugPrint('Unable to sign out: $error');
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Could not sign out. Please try again.'),
+                    ),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(

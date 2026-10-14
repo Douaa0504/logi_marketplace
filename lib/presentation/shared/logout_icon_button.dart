@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logi_marketplace/core/navigation/app_router.dart';
+import 'package:logi_marketplace/presentation/auth/cubit/auth_cubit.dart';
 
 class LogoutIconButton extends StatelessWidget {
   const LogoutIconButton({super.key});
 
   Future<void> _handleLogout(BuildContext context) async {
-    await Supabase.instance.client.auth.signOut();
-    if (context.mounted) {
-      // Return to Auth/Login screen
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    try {
+      await context.read<AuthCubit>().signOut();
+      if (!context.mounted) return;
+      AppRouter.routeToAuth(context);
+    } catch (error) {
+      debugPrint('Unable to sign out: $error');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not sign out. Please try again.')),
+      );
     }
   }
 

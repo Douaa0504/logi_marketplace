@@ -9,11 +9,12 @@ class CategorySelector extends StatelessWidget {
 
   final List<String> _categories = const [
     'All',
+    'Electronics',
+    'Clothing',
     'Home',
-    'Gaming',
-    'Books',
-    'Fashion',
-    'Electronics'
+    'Beauty',
+    'Sports',
+    'Other',
   ];
 
   @override
@@ -38,7 +39,8 @@ class CategorySelector extends StatelessWidget {
               return CategoryChip(
                 label: category,
                 isSelected: selected == category,
-                onTap: () => context.read<BuyerHomeCubit>().selectCategory(category),
+                onTap: () =>
+                    context.read<BuyerHomeCubit>().selectCategory(category),
               );
             },
           ),

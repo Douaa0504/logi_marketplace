@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class AuthRepository {
-  Future<User?> signUp({
+  Future<AuthResponse> signUp({
     required String email,
     required String password,
     required String fullName,
@@ -14,5 +14,14 @@ abstract class AuthRepository {
   });
 
   Future<void> signOut();
-  Future<String?> getUserRole();
+  Future<String> getUserRole();
+}
+
+class AuthProfileException implements Exception {
+  final String message;
+
+  const AuthProfileException(this.message);
+
+  @override
+  String toString() => message;
 }

@@ -6,7 +6,7 @@ class SignUpUseCase {
 
   SignUpUseCase(this.repository);
 
-  Future<User?> call({
+  Future<AuthResponse> call({
     required String email,
     required String password,
     required String fullName,

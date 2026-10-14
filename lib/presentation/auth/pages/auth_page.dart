@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-// Navigation & Storage
-import 'package:logi_marketplace/core/navigation/app_router.dart'; // <--- هادي هي لي كانت ناقصة
-import 'package:logi_marketplace/core/storage/app_storage.dart';
+// Navigation
+import 'package:logi_marketplace/core/navigation/app_router.dart';
+import 'package:logi_marketplace/domain/repositories/auth_repository.dart';
 
 // Cubit & States
 import 'package:logi_marketplace/presentation/auth/cubit/auth_cubit.dart';
@@ -40,29 +40,41 @@ class _AuthPageState extends State<AuthPage> {
     super.dispose();
   }
 
-  void _handleAuthSuccess(BuildContext context, AuthSuccess state) async {
-    await AppStorage().saveUserRole(state.role);
+  Future<void> _handleAuthSuccess(BuildContext context, AuthSuccess state) async {
+    try {
+      if (!context.mounted) return;
 
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white, size: 20),
-            const SizedBox(width: 12),
-            Text('Welcome back, ${state.user.email}!'),
-          ],
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Text('Welcome back, ${state.user.email}!'),
+            ],
+          ),
+          backgroundColor: Colors.green[600],
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        backgroundColor: Colors.green[600],
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+      );
+      await AppRouter.routeUser(context);
+    } catch (error) {
+      debugPrint('Unable to route the authenticated user: $error');
+      if (!context.mounted) return;
 
-    if (!mounted) return;
-    await AppRouter.routeUser(context);
+      final message = error is AuthProfileException
+          ? error.message
+          : 'Unable to verify your account right now. Please try again.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red[600],
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
@@ -76,6 +88,16 @@ class _AuthPageState extends State<AuthPage> {
           listener: (context, state) {
             if (state is AuthSuccess) {
               _handleAuthSuccess(context, state);
+            } else if (state is AuthConfirmationRequired) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Account created. Check ${state.email} for a confirmation link, then sign in.',
+                  ),
+                  backgroundColor: Colors.blue[700],
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
             } else if (state is AuthFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

@@ -11,11 +11,16 @@ class AuthInitial extends AuthState {
 // Loading state for API calls
 class AuthLoading extends AuthState {}
 
-// Success state returning the authenticated user and their business role
+class AuthConfirmationRequired extends AuthState {
+  final String email;
+
+  AuthConfirmationRequired({required this.email});
+}
+
+// Success state returning the authenticated user
 class AuthSuccess extends AuthState {
   final User user;
-  final String role;
-  AuthSuccess({required this.user, required this.role});
+  AuthSuccess({required this.user});
 }
 
 // Failure state capturing error messages

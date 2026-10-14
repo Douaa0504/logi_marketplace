@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class SearchFilterBar extends StatelessWidget {
-  const SearchFilterBar({super.key});
+  final ValueChanged<String> onSearchChanged;
+
+  const SearchFilterBar({super.key, required this.onSearchChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +26,18 @@ class SearchFilterBar extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.search_rounded, color: Color(0xFF64748B), size: 22),
-                  SizedBox(width: 12),
+                  const Icon(
+                    Icons.search_rounded,
+                    color: Color(0xFF64748B),
+                    size: 22,
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
-                      decoration: InputDecoration(
+                      onChanged: onSearchChanged,
+                      decoration: const InputDecoration(
                         hintText: 'Search products...',
                         hintStyle: TextStyle(
                           color: Color(0xFF64748B),
@@ -45,23 +52,6 @@ class SearchFilterBar extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            height: 54,
-            width: 54,
-            decoration: BoxDecoration(
-              color: const Color(0xFF2563EB),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF2563EB).withValues(alpha: 0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.tune_rounded, color: Colors.white),
           ),
         ],
       ),

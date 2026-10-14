@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:logi_marketplace/presentation/auth/pages/auth_page.dart';
-import 'package:logi_marketplace/presentation/buyer/home/view/buyer_home_page.dart';
-import 'package:logi_marketplace/presentation/seller/dashboard/seller_dashboard_page.dart';
+import '../../../core/navigation/app_router.dart';
+import '../../../domain/repositories/auth_repository.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -12,6 +10,8 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
@@ -23,63 +23,51 @@ class _SplashPageState extends State<SplashPage> {
     if (!mounted) return;
 
     try {
-      final supabase = Supabase.instance.client;
-      final session = supabase.auth.currentSession;
-      final user = supabase.auth.currentUser;
-
-      debugPrint("DEBUG_AUTH: Session = ${session != null}, User = ${user?.id}");
-
-      if (session == null || user == null) {
-        debugPrint("DEBUG_AUTH: No active user, redirecting to AuthPage");
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const AuthPage()),
-        );
-        return;
-      }
-
-      // Fetch profile role directly from Supabase
-      debugPrint("DEBUG_AUTH: Fetching role for user ${user.id}...");
-      final response = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .maybeSingle();
-
-      debugPrint("DEBUG_AUTH: DB Profile Response = $response");
-
-      final String? role = response?['role']?.toString();
-      debugPrint("DEBUG_AUTH: Extracted Role = '$role'");
-
+      await AppRouter.routeUser(context);
+    } catch (error) {
+      debugPrint('Unable to resolve the startup route: $error');
       if (!mounted) return;
-
-      if (role == 'seller') {
-        debugPrint("DEBUG_AUTH: SUCCESS -> NAVIGATING TO SELLER DASHBOARD!");
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const SellerDashboardPage()),
-        );
-      } else {
-        debugPrint("DEBUG_AUTH: NAVIGATING TO BUYER HOME!");
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const BuyerHomePage()),
-        );
-      }
-    } catch (e, stack) {
-      debugPrint("DEBUG_AUTH ERROR: $e");
-      debugPrint(stack.toString());
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const AuthPage()),
-        );
-      }
+      setState(() {
+        _errorMessage = error is AuthProfileException
+            ? error.message
+            : 'Unable to verify your account right now. Please try again.';
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_errorMessage != null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(_errorMessage!, textAlign: TextAlign.center),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() => _errorMessage = null);
+                    _init();
+                  },
+                  child: const Text('Retry'),
+                ),
+                TextButton(
+                  onPressed: () => AppRouter.routeToAuth(context),
+                  child: const Text('Go to sign in'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return const Scaffold(
       backgroundColor: Color(0xFFF8FAFC),
       body: Center(

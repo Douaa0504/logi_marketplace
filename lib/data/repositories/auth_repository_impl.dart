@@ -8,7 +8,7 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<User?> signUp({
+  Future<AuthResponse> signUp({
     required String email,
     required String password,
     required String fullName,
@@ -20,7 +20,7 @@ class AuthRepositoryImpl implements AuthRepository {
       fullName: fullName,
       role: role,
     );
-    return response.user;
+    return response;
   }
 
   @override
@@ -41,10 +41,26 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<String?> getUserRole() async {
+  Future<String> getUserRole() async {
     final user = remoteDataSource.getCurrentUser();
-    if (user == null) return null;
+    if (user == null) {
+      throw const AuthProfileException('No authenticated user is available.');
+    }
+
     final profile = await remoteDataSource.getUserProfile(user.id);
-    return profile?['role'] as String?;
+    if (profile == null) {
+      throw const AuthProfileException(
+        'Your account profile is missing. Contact support to restore access.',
+      );
+    }
+
+    final role = profile['role']?.toString().trim().toLowerCase();
+    if (role == null || (role != 'buyer' && role != 'seller')) {
+      throw const AuthProfileException(
+        'Your account profile does not have a valid buyer or seller role.',
+      );
+    }
+
+    return role;
   }
 }

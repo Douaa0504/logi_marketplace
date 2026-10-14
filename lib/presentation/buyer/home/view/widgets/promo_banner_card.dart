@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class PromoBannerCard extends StatelessWidget {
-  const PromoBannerCard({super.key});
+  final VoidCallback onShopNow;
+
+  const PromoBannerCard({super.key, required this.onShopNow});
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,10 @@ class PromoBannerCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(100),
@@ -73,19 +78,25 @@ class PromoBannerCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 FittedBox(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: onShopNow,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: const Color(0xFF2563EB),
                       elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     child: const Text(
                       'Shop Now',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

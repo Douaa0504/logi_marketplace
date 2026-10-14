@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/navigation/app_router.dart';
 import '../auth/cubit/auth_cubit.dart';
-import '../auth/pages/auth_page.dart';
 
 class LogoutButton extends StatelessWidget {
   final bool isFullWidth;
@@ -40,13 +40,21 @@ class LogoutButton extends StatelessWidget {
             child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(dialogContext);
-              context.read<AuthCubit>().signOut();
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const AuthPage()),
-                (route) => false,
-              );
+              try {
+                await context.read<AuthCubit>().signOut();
+                if (!context.mounted) return;
+                AppRouter.routeToAuth(context);
+              } catch (error) {
+                debugPrint('Unable to sign out: $error');
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Could not sign out. Please try again.'),
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,

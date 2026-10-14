@@ -51,7 +51,23 @@ class ProductGridView extends StatelessWidget {
             },
           );
         } else if (state is BuyerHomeError) {
-          return Center(child: Text(state.message));
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(state.message, textAlign: TextAlign.center),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () =>
+                        context.read<BuyerHomeCubit>().loadHomeData(),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
         }
         return const SizedBox.shrink();
       },
@@ -90,10 +106,7 @@ class ProductGridView extends StatelessWidget {
           const Text(
             'Try switching categories or check back later.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Color(0xFF64748B),
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
           ),
         ],
       ),

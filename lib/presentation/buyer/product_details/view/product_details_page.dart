@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:logi_marketplace/data/services/cart_service.dart';
+import 'package:logi_marketplace/presentation/auth/pages/cart_page.dart';
 import '../../../../domain/entities/product_entity.dart';
 import '../../../shared/primary_button.dart';
 
@@ -77,21 +79,14 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         onPressed: () => Navigator.pop(context),
         icon: const CircleAvatar(
           backgroundColor: Colors.white,
-          child: Icon(Icons.arrow_back_ios_new_rounded,
-              color: Color(0xFF0F172A), size: 18),
-        ),
-      ),
-      actions: [
-        IconButton(
-          onPressed: () {},
-          icon: const CircleAvatar(
-            backgroundColor: Colors.white,
-            child: Icon(Icons.favorite_border_rounded,
-                color: Color(0xFF0F172A), size: 20),
+          child: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF0F172A),
+            size: 18,
           ),
         ),
-        const SizedBox(width: 8),
-      ],
+      ),
+      actions: [const SizedBox(width: 8)],
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
           tag: 'product_${widget.product.id}',
@@ -107,8 +102,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             ),
             child: widget.product.imageUrl == null
                 ? const Center(
-                    child: Icon(Icons.image_not_supported_outlined,
-                        size: 64, color: Color(0xFF64748B)))
+                    child: Icon(
+                      Icons.image_not_supported_outlined,
+                      size: 64,
+                      color: Color(0xFF64748B),
+                    ),
+                  )
                 : null,
           ),
         ),
@@ -148,9 +147,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               child: const Text(
                 'In Stock',
                 style: TextStyle(
-                    color: Colors.green,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold),
+                  color: Colors.green,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -173,7 +173,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             Text(
               '4.8',
               style: TextStyle(
-                  fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0F172A),
+              ),
             ),
             SizedBox(width: 4),
             Text(
@@ -248,14 +250,13 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
+                    color: isSelected
+                        ? const Color(0xFF2563EB)
+                        : Colors.transparent,
                     width: 2,
                   ),
                 ),
-                child: CircleAvatar(
-                  radius: 16,
-                  backgroundColor: entry.value,
-                ),
+                child: CircleAvatar(radius: 16, backgroundColor: entry.value),
               ),
             );
           }).toList(),
@@ -289,8 +290,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Price',
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 14)),
+                  const Text(
+                    'Price',
+                    style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                  ),
                   Text(
                     '\$${widget.product.price.toStringAsFixed(2)}',
                     style: const TextStyle(
@@ -305,7 +308,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               Expanded(
                 child: PrimaryButton(
                   label: 'Add to Cart',
-                  onPressed: () {},
+                  onPressed: _addToCart,
                 ),
               ),
             ],
@@ -313,5 +316,32 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         ),
       ),
     );
+  }
+
+  void _addToCart() {
+    try {
+      CartService().addToCart(widget.product);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.product.title} added to cart.'),
+          action: SnackBarAction(
+            label: 'View Cart',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CartPage()),
+              );
+            },
+          ),
+        ),
+      );
+    } catch (error) {
+      debugPrint('Unable to add product to cart: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not add this product to your cart.'),
+        ),
+      );
+    }
   }
 }

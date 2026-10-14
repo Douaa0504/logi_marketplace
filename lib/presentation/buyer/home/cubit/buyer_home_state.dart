@@ -17,14 +17,16 @@ class BuyerHomeLoading extends BuyerHomeState {}
 class BuyerHomeLoaded extends BuyerHomeState {
   final List<ProductEntity> products;
   final String selectedCategory;
+  final String searchQuery;
 
   const BuyerHomeLoaded({
     required this.products,
     required this.selectedCategory,
+    required this.searchQuery,
   });
 
   @override
-  List<Object?> get props => [products, selectedCategory];
+  List<Object?> get props => [products, selectedCategory, searchQuery];
 }
 
 class BuyerHomeError extends BuyerHomeState {
