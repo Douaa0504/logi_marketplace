@@ -62,6 +62,7 @@ class LogiMarketplaceApp extends StatelessWidget {
     );
     final productRepository = ProductRepositoryImpl(
       supabaseClient: supabaseClient,
+      remoteDataSource: productDataSource,
     );
     final addProductUseCase = AddProductUseCase(productRepository);
 
@@ -86,7 +87,8 @@ class LogiMarketplaceApp extends StatelessWidget {
             ),
           ),
           BlocProvider<BuyerHomeCubit>(
-            create: (context) => BuyerHomeCubit(productRepository)..loadHomeData(),
+            create: (context) =>
+                BuyerHomeCubit(productRepository)..loadHomeData(),
           ),
         ],
         child: MaterialApp(

@@ -2,9 +2,13 @@ import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/product_model.dart';
 
+/// Storage bucket for product photos. Confirm this exact name exists in
+/// the Supabase project (Storage), is public, and allows authenticated uploads.
+const String productImagesStorageBucket = 'products';
+
 abstract class ProductRemoteDataSource {
   Future<List<ProductModel>> getProducts();
-  Future<List<ProductModel>> fetchProducts(); // تم إضافتها لإنهاء الخطأ
+  Future<List<ProductModel>> fetchProducts();
   Future<List<ProductModel>> getProductsBySeller(String sellerId);
   Future<ProductModel> addProduct(ProductModel product, File? imageFile);
 }
@@ -25,6 +29,14 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     return sanitized.isEmpty ? 'product' : sanitized;
   }
 
+  String? _remoteImageUrlOrNull(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final uri = Uri.tryParse(value.trim());
+    if (uri == null) return null;
+    if (uri.scheme != 'http' && uri.scheme != 'https') return null;
+    return value.trim();
+  }
+
   @override
   Future<List<ProductModel>> getProducts() async {
     final response = await supabaseClient
@@ -39,7 +51,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
 
   @override
   Future<List<ProductModel>> fetchProducts() async {
-    return await getProducts(); // تقوم باستدعاء getProducts مباشرة
+    return getProducts();
   }
 
   @override
@@ -57,7 +69,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
 
   @override
   Future<ProductModel> addProduct(ProductModel product, File? imageFile) async {
-    String? imageUrl = product.imageUrl;
+    String? imageUrl;
 
     if (imageFile != null) {
       final safeTitle = _sanitizeStorageFileName(product.title);
@@ -66,14 +78,24 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       final path = 'products/$fileName';
 
       await supabaseClient.storage
-          .from('product-images')
-          .upload(path, imageFile);
+          .from(productImagesStorageBucket)
+          .upload(
+            path,
+            imageFile,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+          );
       imageUrl = supabaseClient.storage
-          .from('product-images')
+          .from(productImagesStorageBucket)
           .getPublicUrl(path);
+    } else {
+      imageUrl = _remoteImageUrlOrNull(product.imageUrl);
     }
 
-    final productData = product.toJson();
+    final productData = Map<String, dynamic>.from(product.toJson());
+    final id = productData['id'];
+    if (id == null || id.toString().trim().isEmpty) {
+      productData.remove('id');
+    }
     productData['image_url'] = imageUrl;
 
     final response = await supabaseClient

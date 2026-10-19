@@ -18,4 +18,14 @@ class ProductEntity {
     required this.category,
     required this.createdAt,
   });
+
+  /// Public HTTP(S) URL only. Local device paths are treated as missing.
+  String? get remoteImageUrl {
+    final url = imageUrl;
+    if (url == null || url.trim().isEmpty) return null;
+    final uri = Uri.tryParse(url.trim());
+    if (uri == null) return null;
+    if (uri.scheme != 'http' && uri.scheme != 'https') return null;
+    return url.trim();
+  }
 }

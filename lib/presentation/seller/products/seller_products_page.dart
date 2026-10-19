@@ -91,23 +91,26 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
-                    leading: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                    leading: product.remoteImageUrl != null
                         ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        product.imageUrl!,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
-                      ),
-                    )
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              product.remoteImageUrl!,
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.image_not_supported),
+                            ),
+                          )
                         : const Icon(Icons.shopping_bag, size: 40),
                     title: Text(
                       product.title,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text('${product.category} • \$${product.price.toStringAsFixed(2)}'),
+                    subtitle: Text(
+                      '${product.category} • \$${product.price.toStringAsFixed(2)}',
+                    ),
                     trailing: Text(
                       product.createdAt.toString().split(' ')[0],
                       style: const TextStyle(color: Colors.grey, fontSize: 12),

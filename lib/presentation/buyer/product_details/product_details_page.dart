@@ -14,7 +14,12 @@ class ProductDetailsPage extends StatefulWidget {
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
   int _selectedColorIndex = 0;
   int _selectedSizeIndex = 1;
-  final List<Color> _colors = [Colors.black, Colors.indigo, Colors.brown, Colors.grey];
+  final List<Color> _colors = [
+    Colors.black,
+    Colors.indigo,
+    Colors.brown,
+    Colors.grey,
+  ];
   final List<String> _sizes = ['S', 'M', 'L', 'XL'];
 
   @override
@@ -36,7 +41,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   _buildSectionTitle('Description'),
                   const SizedBox(height: 12),
                   Text(
-                    widget.product.description ?? 'This premium product is crafted with high-quality materials to ensure durability and style. Perfect for daily use and versatile enough for any occasion.',
+                    widget.product.description ??
+                        'This premium product is crafted with high-quality materials to ensure durability and style. Perfect for daily use and versatile enough for any occasion.',
                     style: const TextStyle(
                       fontSize: 15,
                       color: Color(0xFF64748B),
@@ -67,7 +73,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         child: CircleAvatar(
           backgroundColor: Colors.white.withValues(alpha: 0.9),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF0F172A), size: 18),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Color(0xFF0F172A),
+              size: 18,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -78,7 +88,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           child: CircleAvatar(
             backgroundColor: Colors.white.withValues(alpha: 0.9),
             child: IconButton(
-              icon: const Icon(Icons.favorite_border_rounded, color: Color(0xFF0F172A), size: 20),
+              icon: const Icon(
+                Icons.favorite_border_rounded,
+                color: Color(0xFF0F172A),
+                size: 20,
+              ),
               onPressed: () {},
             ),
           ),
@@ -87,21 +101,31 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
           tag: 'product_${widget.product.id}',
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              image: widget.product.imageUrl != null
-                  ? DecorationImage(
-                      image: NetworkImage(widget.product.imageUrl!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: widget.product.imageUrl == null
-                ? const Center(
-                    child: Icon(Icons.image_not_supported_outlined, size: 64, color: Color(0xFF64748B)),
+          child: ColoredBox(
+            color: const Color(0xFFF1F5F9),
+            child: widget.product.remoteImageUrl != null
+                ? Image.network(
+                    widget.product.remoteImageUrl!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Center(
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 64,
+                          color: Color(0xFF64748B),
+                        ),
+                      );
+                    },
                   )
-                : null,
+                : const Center(
+                    child: Icon(
+                      Icons.image_not_supported_outlined,
+                      size: 64,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
           ),
         ),
       ),
@@ -136,7 +160,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 SizedBox(width: 4),
                 Text(
                   '4.9 (2.4k Reviews)',
-                  style: TextStyle(color: Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: Color(0xFF64748B),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -166,7 +194,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             const SizedBox(width: 12),
             const Text(
               'In Stock',
-              style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 14),
+              style: TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
             ),
           ],
         ),
@@ -177,7 +209,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF0F172A),
+      ),
     );
   }
 
@@ -202,7 +238,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     color: _colors[index],
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: _selectedColorIndex == index ? const Color(0xFF2563EB) : Colors.transparent,
+                      color: _selectedColorIndex == index
+                          ? const Color(0xFF2563EB)
+                          : Colors.transparent,
                       width: 2,
                     ),
                   ),
@@ -232,13 +270,17 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   width: 50,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                    color: isSelected
+                        ? const Color(0xFF0F172A)
+                        : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     _sizes[index],
                     style: TextStyle(
-                      color: isSelected ? Colors.white : const Color(0xFF0F172A),
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF0F172A),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -271,10 +313,17 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Total Price', style: TextStyle(color: Color(0xFF64748B), fontSize: 13)),
+                const Text(
+                  'Total Price',
+                  style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                ),
                 Text(
                   '\$${widget.product.price.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A),
+                  ),
                 ),
               ],
             ),
@@ -287,7 +336,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     SnackBar(
                       content: const Text('Product added to cart!'),
                       behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       backgroundColor: const Color(0xFF2563EB),
                     ),
                   );

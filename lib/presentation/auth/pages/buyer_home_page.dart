@@ -37,9 +37,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.black54),
-            onPressed: () {
-
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -47,7 +45,10 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         children: [
           // 1. Search Bar Section
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: Row(
               children: [
                 Expanded(
@@ -87,7 +88,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: ['All', 'Home', 'Gaming', 'Books', 'Fashion'].map((category) {
+              children: ['All', 'Home', 'Gaming', 'Books', 'Fashion'].map((
+                category,
+              ) {
                 final isSelected = selectedCategory == category;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8.0),
@@ -103,12 +106,16 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                     backgroundColor: Colors.white,
                     labelStyle: TextStyle(
                       color: isSelected ? Colors.white : Colors.black87,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                       side: BorderSide(
-                        color: isSelected ? Colors.transparent : Colors.grey.shade300,
+                        color: isSelected
+                            ? Colors.transparent
+                            : Colors.grey.shade300,
                       ),
                     ),
                     showCheckmark: false,
@@ -139,15 +146,17 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   }
 
                   return RefreshIndicator(
-                    onRefresh: () => context.read<ProductCubit>().loadProducts(),
+                    onRefresh: () =>
+                        context.read<ProductCubit>().loadProducts(),
                     child: GridView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.75,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.75,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                          ),
                       itemCount: state.products.length,
                       itemBuilder: (context, index) {
                         final product = state.products[index];
@@ -168,21 +177,35 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                                       top: Radius.circular(16),
                                     ),
                                   ),
-                                  child: product.imageUrl != null
+                                  child: product.remoteImageUrl != null
                                       ? ClipRRect(
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(16),
-                                    ),
-                                    child: Image.network(
-                                      product.imageUrl!,
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                    ),
-                                  )
+                                          borderRadius:
+                                              const BorderRadius.vertical(
+                                                top: Radius.circular(16),
+                                              ),
+                                          child: Image.network(
+                                            product.remoteImageUrl!,
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                                  return const Center(
+                                                    child: Icon(
+                                                      Icons.image,
+                                                      size: 40,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  );
+                                                },
+                                          ),
+                                        )
                                       : const Center(
-                                    child: Icon(Icons.image,
-                                        size: 40, color: Colors.grey),
-                                  ),
+                                          child: Icon(
+                                            Icons.image,
+                                            size: 40,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
                                 ),
                               ),
                               Padding(
@@ -193,7 +216,8 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                                     Text(
                                       product.title,
                                       style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),

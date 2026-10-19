@@ -90,25 +90,31 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
           tag: 'product_${widget.product.id}',
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              image: widget.product.imageUrl != null
-                  ? DecorationImage(
-                      image: NetworkImage(widget.product.imageUrl!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: widget.product.imageUrl == null
-                ? const Center(
+          child: ColoredBox(
+            color: const Color(0xFFF1F5F9),
+            child: widget.product.remoteImageUrl != null
+                ? Image.network(
+                    widget.product.remoteImageUrl!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Center(
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 64,
+                          color: Color(0xFF64748B),
+                        ),
+                      );
+                    },
+                  )
+                : const Center(
                     child: Icon(
                       Icons.image_not_supported_outlined,
                       size: 64,
                       color: Color(0xFF64748B),
                     ),
-                  )
-                : null,
+                  ),
           ),
         ),
       ),

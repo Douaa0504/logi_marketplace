@@ -24,7 +24,14 @@ class _BuyerCatalogPageState extends State<BuyerCatalogPage> {
   String _searchQuery = '';
   String _selectedCategory = 'All';
 
-  final List<String> _categories = ['All', 'Electronics', 'Clothing', 'Home', 'Books', 'Other'];
+  final List<String> _categories = [
+    'All',
+    'Electronics',
+    'Clothing',
+    'Home',
+    'Books',
+    'Other',
+  ];
 
   @override
   void initState() {
@@ -70,9 +77,14 @@ class _BuyerCatalogPageState extends State<BuyerCatalogPage> {
   void _applyFilter() {
     setState(() {
       _filteredProducts = _allProducts.where((product) {
-        final matchesCategory = _selectedCategory == 'All' || product.category == _selectedCategory;
-        final matchesSearch = product.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            (product.description?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
+        final matchesCategory =
+            _selectedCategory == 'All' || product.category == _selectedCategory;
+        final matchesSearch =
+            product.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            (product.description?.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ??
+                false);
         return matchesCategory && matchesSearch;
       }).toList();
     });
@@ -83,7 +95,10 @@ class _BuyerCatalogPageState extends State<BuyerCatalogPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Explore Products', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Explore Products',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -92,7 +107,10 @@ class _BuyerCatalogPageState extends State<BuyerCatalogPage> {
             alignment: Alignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.shopping_cart_outlined, color: Color(0xFF0F172A)),
+                icon: const Icon(
+                  Icons.shopping_cart_outlined,
+                  color: Color(0xFF0F172A),
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -110,7 +128,10 @@ class _BuyerCatalogPageState extends State<BuyerCatalogPage> {
                       color: Color(0xFF2563EB),
                       shape: BoxShape.circle,
                     ),
-                    constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
                     child: Text(
                       '${_cartService.itemCount}',
                       style: const TextStyle(
@@ -165,14 +186,21 @@ class _BuyerCatalogPageState extends State<BuyerCatalogPage> {
                   final category = _categories[index];
                   final isSelected = _selectedCategory == category;
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 8,
+                    ),
                     child: ChoiceChip(
                       label: Text(category),
                       selected: isSelected,
                       selectedColor: const Color(0xFF2563EB),
                       labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : const Color(0xFF0F172A),
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFF0F172A),
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                       onSelected: (selected) {
                         if (selected) {
@@ -199,98 +227,136 @@ class _BuyerCatalogPageState extends State<BuyerCatalogPage> {
                   : _filteredProducts.isEmpty
                   ? const Center(child: Text('No products found'))
                   : GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.72,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                itemCount: _filteredProducts.length,
-                itemBuilder: (context, index) {
-                  final product = _filteredProducts[index];
-                  return Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: Colors.grey.shade200),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                            ),
-                            child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-                                ? ClipRRect(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                              child: Image.network(
-                                product.imageUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.broken_image, size: 40, color: Colors.grey),
-                              ),
-                            )
-                                : const Icon(Icons.image, size: 40, color: Colors.grey),
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.72,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
+                      itemCount: _filteredProducts.length,
+                      itemBuilder: (context, index) {
+                        final product = _filteredProducts[index];
+                        return Card(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: Colors.grey.shade200),
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                product.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '\$${product.price.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  color: Color(0xFF2563EB),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
+                              Expanded(
+                                child: Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(12),
+                                    ),
+                                  ),
+                                  child: product.remoteImageUrl != null
+                                      ? ClipRRect(
+                                          borderRadius:
+                                              const BorderRadius.vertical(
+                                                top: Radius.circular(12),
+                                              ),
+                                          child: Image.network(
+                                            product.remoteImageUrl!,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    const Icon(
+                                                      Icons.broken_image,
+                                                      size: 40,
+                                                      color: Colors.grey,
+                                                    ),
+                                          ),
+                                        )
+                                      : const Icon(
+                                          Icons.image,
+                                          size: 40,
+                                          color: Colors.grey,
+                                        ),
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              SizedBox(
-                                width: double.infinity,
-                                height: 36,
-                                child: ElevatedButton.icon(
-                                  onPressed: () {
-                                    _cartService.addToCart(product);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('${product.title} added to cart!'),
-                                        duration: const Duration(seconds: 1),
+                              Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      product.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
                                       ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF2563EB),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                    padding: EdgeInsets.zero,
-                                  ),
-                                  icon: const Icon(Icons.add_shopping_cart, size: 16, color: Colors.white),
-                                  label: const Text('Add', style: TextStyle(fontSize: 12, color: Colors.white)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '\$${product.price.toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                        color: Color(0xFF2563EB),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 36,
+                                      child: ElevatedButton.icon(
+                                        onPressed: () {
+                                          _cartService.addToCart(product);
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                '${product.title} added to cart!',
+                                              ),
+                                              duration: const Duration(
+                                                seconds: 1,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: const Color(
+                                            0xFF2563EB,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          padding: EdgeInsets.zero,
+                                        ),
+                                        icon: const Icon(
+                                          Icons.add_shopping_cart,
+                                          size: 16,
+                                          color: Colors.white,
+                                        ),
+                                        label: const Text(
+                                          'Add',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),

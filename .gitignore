@@ -1,52 +1,92 @@
 # Miscellaneous
+
 *.class
 *.log
 *.pyc
 *.swp
+*.swo
 .DS_Store
 .atom/
 .build/
 .buildlog/
-.history
+.history/
 .svn/
 .swiftpm/
 migrate_working_dir/
 
-# IntelliJ / Android Studio related
+# IntelliJ / Android Studio
+
 *.iml
 *.ipr
 *.iws
 .idea/
 
-# VS Code related
+# VS Code
+
 .vscode/
 
-# Flutter/Dart/Pub related
+# Cursor
+
+.cursor/
+
+# Flutter / Dart
+
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/
-/coverage/
+build/
+coverage/
+.packages
+.flutter-plugins-dependencies
 
-# Web related
+# Flutter generated plugin registrant files
+
+# Keep generated platform files unless they are explicitly build artifacts.
+
+# Web
+
 .web/
 
-# Symbolication and Obfuscation
+# Symbolication and obfuscation
+
 app.*.symbols
 app.*.map.json
 
-# Android Studio build artifacts
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Android build artifacts
 
-# Secrets and Environment Variables (Critical for Supabase Security)
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+
+# Environment variables and secrets
+
 .env
-*.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+secrets.json
+service-account*.json
 
-# Hive Local Database Cache (Prevent pushing local storage to GitHub)
+# Hive local database files
+
 *.hive
 *.box
+*.hive.lock
+
+# Temporary files
+
+*.tmp
+*.bak
+*.orig
+*~
+
+# OS files
+
+Thumbs.db
+Desktop.ini
