@@ -29,7 +29,7 @@ class _AddProductPageState extends State<AddProductPage> {
     'Home',
     'Beauty',
     'Sports',
-    'Other'
+    'Other',
   ];
 
   Future<void> _pickImage() async {
@@ -50,9 +50,9 @@ class _AddProductPageState extends State<AddProductPage> {
 
     final currentUser = Supabase.instance.client.auth.currentUser;
     if (currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User not authenticated')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('User not authenticated')));
       return;
     }
 
@@ -77,9 +77,7 @@ class _AddProductPageState extends State<AddProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add New Product'),
-      ),
+      appBar: AppBar(title: const Text('Add New Product')),
       body: BlocListener<ProductCubit, ProductState>(
         listener: (context, state) {
           if (state is ProductSuccess) {
@@ -88,9 +86,9 @@ class _AddProductPageState extends State<AddProductPage> {
             );
             Navigator.pop(context, true);
           } else if (state is ProductFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.message}')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Error: ${state.message}')));
           }
         },
         child: SingleChildScrollView(
@@ -111,17 +109,24 @@ class _AddProductPageState extends State<AddProductPage> {
                     ),
                     child: _selectedImage != null
                         ? ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.file(_selectedImage!, fit: BoxFit.cover),
-                    )
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.file(
+                              _selectedImage!,
+                              fit: BoxFit.cover,
+                            ),
+                          )
                         : const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
-                        SizedBox(height: 8),
-                        Text('Tap to select product image'),
-                      ],
-                    ),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_a_photo,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(height: 8),
+                              Text('Tap to select product image'),
+                            ],
+                          ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -131,19 +136,23 @@ class _AddProductPageState extends State<AddProductPage> {
                     labelText: 'Product Title',
                     border: OutlineInputBorder(),
                   ),
-                  validator: (v) => v == null || v.isEmpty ? 'Title is required' : null,
+                  validator: (v) =>
+                      v == null || v.isEmpty ? 'Title is required' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _priceController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: const InputDecoration(
                     labelText: 'Price (\$)',
                     border: OutlineInputBorder(),
                   ),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Price is required';
-                    if (double.tryParse(v) == null) return 'Enter a valid number';
+                    if (double.tryParse(v) == null)
+                      return 'Enter a valid number';
                     return null;
                   },
                 ),
@@ -155,7 +164,9 @@ class _AddProductPageState extends State<AddProductPage> {
                     border: OutlineInputBorder(),
                   ),
                   items: _categories
-                      .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
+                      .map(
+                        (cat) => DropdownMenuItem(value: cat, child: Text(cat)),
+                      )
                       .toList(),
                   onChanged: (val) {
                     if (val != null) setState(() => _selectedCategory = val);
@@ -174,13 +185,18 @@ class _AddProductPageState extends State<AddProductPage> {
                 BlocBuilder<ProductCubit, ProductState>(
                   builder: (context, state) {
                     return ElevatedButton(
-                      onPressed: state is ProductLoading ? null : _submitProduct,
+                      onPressed: state is ProductLoading
+                          ? null
+                          : _submitProduct,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       child: state is ProductLoading
                           ? const CircularProgressIndicator()
-                          : const Text('Publish Product', style: TextStyle(fontSize: 16)),
+                          : const Text(
+                              'Publish Product',
+                              style: TextStyle(fontSize: 16),
+                            ),
                     );
                   },
                 ),

@@ -40,7 +40,10 @@ class _AuthPageState extends State<AuthPage> {
     super.dispose();
   }
 
-  Future<void> _handleAuthSuccess(BuildContext context, AuthSuccess state) async {
+  Future<void> _handleAuthSuccess(
+    BuildContext context,
+    AuthSuccess state,
+  ) async {
     try {
       if (!context.mounted) return;
 
@@ -56,7 +59,9 @@ class _AuthPageState extends State<AuthPage> {
           backgroundColor: Colors.green[600],
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
       await AppRouter.routeUser(context);
@@ -105,7 +110,9 @@ class _AuthPageState extends State<AuthPage> {
                   backgroundColor: Colors.red[600],
                   behavior: SnackBarBehavior.floating,
                   margin: const EdgeInsets.all(16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               );
             }
@@ -118,7 +125,10 @@ class _AuthPageState extends State<AuthPage> {
             return Center(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 16.0,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -134,7 +144,9 @@ class _AuthPageState extends State<AuthPage> {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          _selectedRole == 'seller' ? Icons.storefront_rounded : Icons.shopping_bag_rounded,
+                          _selectedRole == 'seller'
+                              ? Icons.storefront_rounded
+                              : Icons.shopping_bag_rounded,
                           size: 42,
                           color: activeColor,
                         ),
@@ -181,7 +193,9 @@ class _AuthPageState extends State<AuthPage> {
                           controller: _nameController,
                           label: 'Full Name',
                           prefixIcon: Icons.person_outline_rounded,
-                          validator: (val) => val == null || val.isEmpty ? 'Please enter your name' : null,
+                          validator: (val) => val == null || val.isEmpty
+                              ? 'Please enter your name'
+                              : null,
                         ),
                         const SizedBox(height: 16),
                       ],
@@ -190,7 +204,9 @@ class _AuthPageState extends State<AuthPage> {
                         label: 'Email Address',
                         prefixIcon: Icons.email_outlined,
                         keyboardType: TextInputType.emailAddress,
-                        validator: (val) => val == null || !val.contains('@') ? 'Enter a valid email' : null,
+                        validator: (val) => val == null || !val.contains('@')
+                            ? 'Enter a valid email'
+                            : null,
                       ),
                       const SizedBox(height: 16),
                       CustomTextField(
@@ -198,7 +214,9 @@ class _AuthPageState extends State<AuthPage> {
                         label: 'Password',
                         prefixIcon: Icons.lock_outline_rounded,
                         isPassword: true,
-                        validator: (val) => val == null || val.length < 6 ? 'Min 6 characters required' : null,
+                        validator: (val) => val == null || val.length < 6
+                            ? 'Min 6 characters required'
+                            : null,
                       ),
                       const SizedBox(height: 32),
                       PrimaryButton(
@@ -208,7 +226,6 @@ class _AuthPageState extends State<AuthPage> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             if (_isSignUp) {
-
                               context.read<AuthCubit>().registerUser(
                                 email: _emailController.text.trim(),
                                 password: _passwordController.text.trim(),
@@ -229,8 +246,13 @@ class _AuthPageState extends State<AuthPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            _isSignUp ? 'Already have an account? ' : "Don't have an account? ",
-                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                            _isSignUp
+                                ? 'Already have an account? '
+                                : "Don't have an account? ",
+                            style: const TextStyle(
+                              color: Color(0xFF64748B),
+                              fontSize: 14,
+                            ),
                           ),
                           GestureDetector(
                             onTap: () => setState(() => _isSignUp = !_isSignUp),
@@ -272,12 +294,12 @@ class _AuthPageState extends State<AuthPage> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: isSelected
                 ? [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              )
-            ]
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
                 : [],
           ),
           child: Text(

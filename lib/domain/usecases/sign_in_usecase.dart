@@ -6,10 +6,7 @@ class SignInUseCase {
 
   SignInUseCase(this.repository);
 
-  Future<User?> call({
-    required String email,
-    required String password,
-  }) async {
+  Future<User?> call({required String email, required String password}) async {
     return await repository.signIn(email: email, password: password);
   }
 }

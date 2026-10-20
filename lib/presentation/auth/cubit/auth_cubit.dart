@@ -58,10 +58,7 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(AuthLoading());
     try {
-      final user = await signInUseCase(
-        email: email,
-        password: password,
-      );
+      final user = await signInUseCase(email: email, password: password);
 
       if (user != null) {
         emit(AuthSuccess(user: user));

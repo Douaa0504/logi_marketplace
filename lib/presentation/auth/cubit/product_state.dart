@@ -1,6 +1,5 @@
 import '../../../domain/entities/product_entity.dart';
 
-
 abstract class ProductState {}
 
 class ProductInitial extends ProductState {}

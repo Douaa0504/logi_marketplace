@@ -6,7 +6,6 @@ class OrderRepositoryImpl {
 
   OrderRepositoryImpl({required this.supabaseClient});
 
-
   Future<List<OrderEntity>> getSellerOrders(String sellerId) async {
     final response = await supabaseClient
         .from('orders')
@@ -15,18 +14,21 @@ class OrderRepositoryImpl {
         .order('created_at', ascending: false);
 
     final data = response as List<dynamic>;
-    return data.map((json) => OrderEntity(
-      id: json['id'].toString(),
-      buyerId: json['buyer_id'] ?? '',
-      sellerId: json['seller_id'] ?? '',
-      productId: json['product_id'] ?? '',
-      quantity: json['quantity'] ?? 1,
-      totalPrice: (json['total_price'] as num).toDouble(),
-      status: json['status'] ?? 'pending',
-      createdAt: DateTime.parse(json['created_at']),
-    )).toList();
+    return data
+        .map(
+          (json) => OrderEntity(
+            id: json['id'].toString(),
+            buyerId: json['buyer_id'] ?? '',
+            sellerId: json['seller_id'] ?? '',
+            productId: json['product_id'] ?? '',
+            quantity: json['quantity'] ?? 1,
+            totalPrice: (json['total_price'] as num).toDouble(),
+            status: json['status'] ?? 'pending',
+            createdAt: DateTime.parse(json['created_at']),
+          ),
+        )
+        .toList();
   }
-
 
   Future<void> updateOrderStatus(String orderId, String newStatus) async {
     await supabaseClient

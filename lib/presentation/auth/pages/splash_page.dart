@@ -74,7 +74,11 @@ class _SplashPageState extends State<SplashPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.shopping_bag_rounded, size: 80, color: Color(0xFF2563EB)),
+            Icon(
+              Icons.shopping_bag_rounded,
+              size: 80,
+              color: Color(0xFF2563EB),
+            ),
             SizedBox(height: 24),
             Text(
               'LogiMarket',
@@ -86,10 +90,7 @@ class _SplashPageState extends State<SplashPage> {
               ),
             ),
             SizedBox(height: 16),
-            CircularProgressIndicator(
-              color: Color(0xFF2563EB),
-              strokeWidth: 3,
-            ),
+            CircularProgressIndicator(color: Color(0xFF2563EB), strokeWidth: 3),
           ],
         ),
       ),

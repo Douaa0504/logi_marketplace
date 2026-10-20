@@ -12,16 +12,6 @@ class ProductDetailsPage extends StatefulWidget {
 }
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
-  int _selectedColorIndex = 0;
-  int _selectedSizeIndex = 1;
-  final List<Color> _colors = [
-    Colors.black,
-    Colors.indigo,
-    Colors.brown,
-    Colors.grey,
-  ];
-  final List<String> _sizes = ['S', 'M', 'L', 'XL'];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,16 +31,13 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   _buildSectionTitle('Description'),
                   const SizedBox(height: 12),
                   Text(
-                    widget.product.description ??
-                        'This premium product is crafted with high-quality materials to ensure durability and style. Perfect for daily use and versatile enough for any occasion.',
+                    widget.product.description ?? 'No description provided.',
                     style: const TextStyle(
                       fontSize: 15,
                       color: Color(0xFF64748B),
                       height: 1.6,
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  _buildVariantSelectors(),
                   const SizedBox(height: 100), // Space for sticky bottom bar
                 ],
               ),
@@ -136,39 +123,20 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2563EB).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: Text(
-                widget.product.category.toUpperCase(),
-                style: const TextStyle(
-                  color: Color(0xFF2563EB),
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Text(
+            widget.product.category.toUpperCase(),
+            style: const TextStyle(
+              color: Color(0xFF2563EB),
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
             ),
-            const Row(
-              children: [
-                Icon(Icons.star_rounded, color: Colors.amber, size: 20),
-                SizedBox(width: 4),
-                Text(
-                  '4.9 (2.4k Reviews)',
-                  style: TextStyle(
-                    color: Color(0xFF64748B),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: 16),
         Text(
@@ -181,26 +149,22 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           ),
         ),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            Text(
-              '\$${widget.product.price.toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF2563EB),
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              'In Stock',
-              style: TextStyle(
-                color: Colors.green,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
-          ],
+        Text(
+          '\$${widget.product.price.toStringAsFixed(2)}',
+          style: const TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF2563EB),
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          'Reviews are not available yet.',
+          style: TextStyle(
+            color: Color(0xFF64748B),
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     );
@@ -214,82 +178,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         fontWeight: FontWeight.bold,
         color: Color(0xFF0F172A),
       ),
-    );
-  }
-
-  Widget _buildVariantSelectors() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Available Color'),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 40,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: _colors.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () => setState(() => _selectedColorIndex = index),
-                child: Container(
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: _colors[index],
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _selectedColorIndex == index
-                          ? const Color(0xFF2563EB)
-                          : Colors.transparent,
-                      width: 2,
-                    ),
-                  ),
-                  child: _selectedColorIndex == index
-                      ? const Icon(Icons.check, color: Colors.white, size: 20)
-                      : null,
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 24),
-        _buildSectionTitle('Select Size'),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 46,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: _sizes.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final isSelected = _selectedSizeIndex == index;
-              return GestureDetector(
-                onTap: () => setState(() => _selectedSizeIndex = index),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 50,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFF0F172A)
-                        : const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    _sizes[index],
-                    style: TextStyle(
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF0F172A),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
 

@@ -49,7 +49,6 @@ class CartService extends ChangeNotifier {
     notifyListeners();
   }
 
-
   Future<void> checkout() async {
     final client = Supabase.instance.client;
     final buyerId = client.auth.currentUser?.id;

@@ -4,26 +4,10 @@ import 'package:logi_marketplace/presentation/auth/pages/cart_page.dart';
 import '../../../../domain/entities/product_entity.dart';
 import '../../../shared/primary_button.dart';
 
-class ProductDetailsPage extends StatefulWidget {
+class ProductDetailsPage extends StatelessWidget {
   final ProductEntity product;
 
   const ProductDetailsPage({super.key, required this.product});
-
-  @override
-  State<ProductDetailsPage> createState() => _ProductDetailsPageState();
-}
-
-class _ProductDetailsPageState extends State<ProductDetailsPage> {
-  int _selectedSizeIndex = 1;
-  int _selectedColorIndex = 0;
-
-  final List<String> _sizes = ['S', 'M', 'L', 'XL'];
-  final List<Color> _colors = [
-    const Color(0xFF0F172A),
-    const Color(0xFF2563EB),
-    const Color(0xFF64748B),
-    const Color(0xFFE2E8F0),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -46,16 +30,13 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                       _buildSectionTitle('Description'),
                       const SizedBox(height: 12),
                       Text(
-                        widget.product.description ??
-                            'No description available for this premium product. It features a modern design and high-quality materials.',
+                        product.description ?? 'No description provided.',
                         style: const TextStyle(
                           fontSize: 15,
                           color: Color(0xFF64748B),
                           height: 1.6,
                         ),
                       ),
-                      const SizedBox(height: 32),
-                      _buildVariantSelectors(),
                       const SizedBox(height: 120), // Bottom bar spacing
                     ],
                   ),
@@ -63,7 +44,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               ),
             ],
           ),
-          _buildStickyBottomBar(),
+          _buildStickyBottomBar(context),
         ],
       ),
     );
@@ -89,12 +70,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       actions: [const SizedBox(width: 8)],
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
-          tag: 'product_${widget.product.id}',
+          tag: 'product_${product.id}',
           child: ColoredBox(
             color: const Color(0xFFF1F5F9),
-            child: widget.product.remoteImageUrl != null
+            child: product.remoteImageUrl != null
                 ? Image.network(
-                    widget.product.remoteImageUrl!,
+                    product.remoteImageUrl!,
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
@@ -125,45 +106,25 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2563EB).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: Text(
-                widget.product.category.toUpperCase(),
-                style: const TextStyle(
-                  color: Color(0xFF2563EB),
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Text(
+            product.category.toUpperCase(),
+            style: const TextStyle(
+              color: Color(0xFF2563EB),
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                'In Stock',
-                style: TextStyle(
-                  color: Colors.green,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: 16),
         Text(
-          widget.product.title,
+          product.title,
           style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -171,24 +132,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(height: 8),
-        const Row(
-          children: [
-            Icon(Icons.star_rounded, color: Colors.amber, size: 20),
-            SizedBox(width: 4),
-            Text(
-              '4.8',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0F172A),
-              ),
-            ),
-            SizedBox(width: 4),
-            Text(
-              '(124 Reviews)',
-              style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
-            ),
-          ],
+        const SizedBox(height: 12),
+        const Text(
+          'Reviews are not available yet.',
+          style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
         ),
       ],
     );
@@ -205,73 +152,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     );
   }
 
-  Widget _buildVariantSelectors() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Select Size'),
-        const SizedBox(height: 12),
-        Row(
-          children: _sizes.asMap().entries.map((entry) {
-            final isSelected = _selectedSizeIndex == entry.key;
-            return GestureDetector(
-              onTap: () => setState(() => _selectedSizeIndex = entry.key),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.only(right: 12),
-                height: 48,
-                width: 48,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF0F172A) : Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF0F172A)
-                        : const Color(0xFFE2E8F0),
-                  ),
-                ),
-                child: Text(
-                  entry.value,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : const Color(0xFF0F172A),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-        const SizedBox(height: 32),
-        _buildSectionTitle('Select Color'),
-        const SizedBox(height: 12),
-        Row(
-          children: _colors.asMap().entries.map((entry) {
-            final isSelected = _selectedColorIndex == entry.key;
-            return GestureDetector(
-              onTap: () => setState(() => _selectedColorIndex = entry.key),
-              child: Container(
-                margin: const EdgeInsets.only(right: 16),
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF2563EB)
-                        : Colors.transparent,
-                    width: 2,
-                  ),
-                ),
-                child: CircleAvatar(radius: 16, backgroundColor: entry.value),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStickyBottomBar() {
+  Widget _buildStickyBottomBar(BuildContext context) {
     return Positioned(
       bottom: 0,
       left: 0,
@@ -301,7 +182,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
                   ),
                   Text(
-                    '\$${widget.product.price.toStringAsFixed(2)}',
+                    '\$${product.price.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -314,7 +195,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               Expanded(
                 child: PrimaryButton(
                   label: 'Add to Cart',
-                  onPressed: _addToCart,
+                  onPressed: () => _addToCart(context),
                 ),
               ),
             ],
@@ -324,12 +205,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     );
   }
 
-  void _addToCart() {
+  void _addToCart(BuildContext context) {
     try {
-      CartService().addToCart(widget.product);
+      CartService().addToCart(product);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${widget.product.title} added to cart.'),
+          content: Text('${product.title} added to cart.'),
           action: SnackBarAction(
             label: 'View Cart',
             onPressed: () {

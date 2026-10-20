@@ -18,7 +18,14 @@ class BuyerHomePage extends StatefulWidget {
 class _BuyerHomePageState extends State<BuyerHomePage> {
   int _selectedIndex = 0;
   String _selectedCategory = 'All';
-  final List<String> _categories = ['All', 'Electronics', 'Fashion', 'Home', 'Gaming', 'Books'];
+  final List<String> _categories = [
+    'All',
+    'Electronics',
+    'Fashion',
+    'Home',
+    'Gaming',
+    'Books',
+  ];
 
   @override
   void initState() {
@@ -35,8 +42,8 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         children: [
           _buildHomeContent(),
           _buildHomeContent(), // Explore Tab
-          const CartPage(),    // Real Cart Page Connected!
-          _buildProfileTab(),  // Buyer Profile Tab
+          const CartPage(), // Real Cart Page Connected!
+          _buildProfileTab(), // Buyer Profile Tab
         ],
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
@@ -65,10 +72,22 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
           selectedItemColor: const Color(0xFF2563EB),
           unselectedItemColor: const Color(0xFF94A3B8),
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Explore'),
-            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_rounded), label: 'Cart'),
-            BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.grid_view_rounded),
+              label: 'Explore',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart_rounded),
+              label: 'Cart',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_rounded),
+              label: 'Profile',
+            ),
           ],
         ),
       ),
@@ -110,12 +129,13 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
       centerTitle: false,
       title: const Text(
         'LogiMarket',
-        style: TextStyle(color: Color(0xFF0F172A), fontSize: 22, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: Color(0xFF0F172A),
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
       ),
-      actions: const [
-        LogoutIconButton(),
-        SizedBox(width: 8),
-      ],
+      actions: const [LogoutIconButton(), SizedBox(width: 8)],
     );
   }
 
@@ -140,7 +160,10 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
           children: [
             Icon(Icons.search_rounded, color: Color(0xFF64748B)),
             SizedBox(width: 12),
-            Text('Search products...', style: TextStyle(color: Color(0xFF64748B), fontSize: 14)),
+            Text(
+              'Search products...',
+              style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+            ),
           ],
         ),
       ),
@@ -152,7 +175,11 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF0F172A),
+        ),
       ),
     );
   }
@@ -185,7 +212,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         } else if (state is ProductLoaded) {
           final products = _selectedCategory == 'All'
               ? state.products
-              : state.products.where((p) => p.category == _selectedCategory).toList();
+              : state.products
+                    .where((p) => p.category == _selectedCategory)
+                    .toList();
 
           if (products.isEmpty) {
             return const Center(child: Text('No products found'));
@@ -210,7 +239,8 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ProductDetailsPage(product: product),
+                      builder: (context) =>
+                          ProductDetailsPage(product: product),
                     ),
                   );
                 },
@@ -230,7 +260,10 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         children: [
           const Icon(Icons.person, size: 80, color: Color(0xFF2563EB)),
           const SizedBox(height: 16),
-          const Text('Customer Profile', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            'Customer Profile',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => const LogoutIconButton(),

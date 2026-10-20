@@ -39,14 +39,12 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
         return;
       }
 
-
       final productsResponse = await client
           .from('products')
           .select('id')
           .eq('seller_id', currentUserId);
 
       final productsCount = (productsResponse as List).length;
-
 
       final ordersResponse = await client
           .from('orders')
@@ -84,7 +82,10 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Analytics', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Analytics',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -100,33 +101,33 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
           : _errorMessage != null
           ? Center(child: Text('Error: $_errorMessage'))
           : RefreshIndicator(
-        onRefresh: _fetchAnalyticsData,
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            _buildMetricCard(
-              title: 'Total Revenue',
-              value: '\$${_totalRevenue.toStringAsFixed(2)}',
-              icon: Icons.attach_money,
-              color: Colors.green,
+              onRefresh: _fetchAnalyticsData,
+              child: ListView(
+                padding: const EdgeInsets.all(16.0),
+                children: [
+                  _buildMetricCard(
+                    title: 'Total Revenue',
+                    value: '\$${_totalRevenue.toStringAsFixed(2)}',
+                    icon: Icons.attach_money,
+                    color: Colors.green,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildMetricCard(
+                    title: 'Total Orders',
+                    value: '$_totalOrders',
+                    icon: Icons.shopping_bag_outlined,
+                    color: Colors.blue,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildMetricCard(
+                    title: 'Active Products',
+                    value: '$_totalProducts',
+                    icon: Icons.inventory_2_outlined,
+                    color: Colors.orange,
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            _buildMetricCard(
-              title: 'Total Orders',
-              value: '$_totalOrders',
-              icon: Icons.shopping_bag_outlined,
-              color: Colors.blue,
-            ),
-            const SizedBox(height: 12),
-            _buildMetricCard(
-              title: 'Active Products',
-              value: '$_totalProducts',
-              icon: Icons.inventory_2_outlined,
-              color: Colors.orange,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -160,7 +161,10 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF64748B),
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(

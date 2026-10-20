@@ -8,10 +8,7 @@ abstract class AuthRepository {
     required String role,
   });
 
-  Future<User?> signIn({
-    required String email,
-    required String password,
-  });
+  Future<User?> signIn({required String email, required String password});
 
   Future<void> signOut();
   Future<String> getUserRole();

@@ -4,7 +4,6 @@ import '../../../../domain/repositories/product_repository.dart';
 import '../cubit/buyer_home_cubit.dart';
 import 'widgets/home_app_bar.dart';
 import 'widgets/search_filter_bar.dart';
-import 'widgets/promo_banner_card.dart';
 import 'widgets/category_selector.dart';
 import 'widgets/product_grid_view.dart';
 
@@ -13,8 +12,6 @@ class BuyerHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final productsSectionKey = GlobalKey();
-
     return BlocProvider(
       create: (context) =>
           BuyerHomeCubit(context.read<ProductRepository>())..loadHomeData(),
@@ -34,19 +31,6 @@ class BuyerHomePage extends StatelessWidget {
                         context.read<BuyerHomeCubit>().searchProducts(query),
                   ),
                   SizedBox(height: 24),
-                  PromoBannerCard(
-                    onShopNow: () {
-                      final sectionContext = productsSectionKey.currentContext;
-                      if (sectionContext != null) {
-                        Scrollable.ensureVisible(
-                          sectionContext,
-                          duration: const Duration(milliseconds: 350),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    },
-                  ),
-                  SizedBox(height: 24),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
@@ -62,7 +46,6 @@ class BuyerHomePage extends StatelessWidget {
                   CategorySelector(),
                   SizedBox(height: 24),
                   Padding(
-                    key: productsSectionKey,
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
                       'Popular Products',
