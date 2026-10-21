@@ -69,22 +69,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           ),
         ),
       ),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: CircleAvatar(
-            backgroundColor: Colors.white.withValues(alpha: 0.9),
-            child: IconButton(
-              icon: const Icon(
-                Icons.favorite_border_rounded,
-                color: Color(0xFF0F172A),
-                size: 20,
-              ),
-              onPressed: () {},
-            ),
-          ),
-        ),
-      ],
+      actions: const [SizedBox(width: 8)],
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
           tag: 'product_${widget.product.id}',

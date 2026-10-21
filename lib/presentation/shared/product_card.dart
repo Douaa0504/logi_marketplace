@@ -2,23 +2,16 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../data/services/cart_service.dart';
 
-class ProductCard extends StatefulWidget {
+class ProductCard extends StatelessWidget {
   final ProductEntity product;
   final VoidCallback onTap;
 
   const ProductCard({super.key, required this.product, required this.onTap});
 
   @override
-  State<ProductCard> createState() => _ProductCardState();
-}
-
-class _ProductCardState extends State<ProductCard> {
-  bool _isFavorite = false;
-
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -45,13 +38,13 @@ class _ProductCardState extends State<ProductCard> {
                         top: Radius.circular(16),
                       ),
                     ),
-                    child: widget.product.remoteImageUrl != null
+                    child: product.remoteImageUrl != null
                         ? ClipRRect(
                             borderRadius: const BorderRadius.vertical(
                               top: Radius.circular(16),
                             ),
                             child: Image.network(
-                              widget.product.remoteImageUrl!,
+                              product.remoteImageUrl!,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return const Center(
@@ -72,30 +65,6 @@ class _ProductCardState extends State<ProductCard> {
                             ),
                           ),
                   ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _isFavorite = !_isFavorite;
-                        });
-                      },
-                      child: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          _isFavorite
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          color: _isFavorite
-                              ? Colors.red
-                              : const Color(0xFF0F172A),
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -105,7 +74,7 @@ class _ProductCardState extends State<ProductCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.product.title,
+                    product.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -119,7 +88,7 @@ class _ProductCardState extends State<ProductCard> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '\$${widget.product.price.toStringAsFixed(2)}',
+                        '\$${product.price.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -128,12 +97,10 @@ class _ProductCardState extends State<ProductCard> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          CartService().addToCart(widget.product);
+                          CartService().addToCart(product);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                '${widget.product.title} added to cart!',
-                              ),
+                              content: Text('${product.title} added to cart!'),
                               duration: const Duration(seconds: 1),
                               backgroundColor: const Color(0xFF2563EB),
                             ),

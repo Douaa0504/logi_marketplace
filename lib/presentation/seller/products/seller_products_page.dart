@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../domain/entities/product_entity.dart';
 import '../../auth/cubit/product_cubit.dart';
 import '../../auth/cubit/product_state.dart';
 import '../../auth/pages/add_product_page.dart';
@@ -21,6 +22,16 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
 
   void _fetchProducts() {
     context.read<ProductCubit>().loadProducts();
+  }
+
+  Future<void> _editProduct(BuildContext context, ProductEntity product) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => AddProductPage(product: product)),
+    );
+    if (result == true && mounted) {
+      _fetchProducts();
+    }
   }
 
   @override
@@ -44,7 +55,7 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
             MaterialPageRoute(builder: (_) => const AddProductPage()),
           );
           if (result == true) {
-            _fetchProducts(); // إعادة جلب المنتجات فور النجاح
+            _fetchProducts(); 
           }
         },
         child: const Icon(Icons.add),
@@ -72,7 +83,7 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
           }
 
           if (state is ProductLoaded) {
-            // تصفية المنتجات لعرض فقط المنتجات الخاصة بالبائع الحالي
+            
             final sellerProducts = state.products
                 .where((p) => p.sellerId == currentUserId)
                 .toList();
@@ -99,7 +110,7 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
                               width: 50,
                               height: 50,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
+                              errorBuilder: (_, _, _) =>
                                   const Icon(Icons.image_not_supported),
                             ),
                           )
@@ -109,11 +120,14 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
-                      '${product.category} • \$${product.price.toStringAsFixed(2)}',
+                      '${product.category} • \$${product.price.toStringAsFixed(2)}\n'
+                      '${product.createdAt.toString().split(' ')[0]}',
                     ),
-                    trailing: Text(
-                      product.createdAt.toString().split(' ')[0],
-                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    isThreeLine: true,
+                    trailing: IconButton(
+                      tooltip: 'Edit product',
+                      icon: const Icon(Icons.edit_outlined),
+                      onPressed: () => _editProduct(context, product),
                     ),
                   ),
                 );

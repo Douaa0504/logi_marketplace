@@ -55,22 +55,6 @@ class SellerProfilePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-            _buildProfileOption(
-              icon: Icons.settings_outlined,
-              label: 'Store Settings',
-              onTap: () {},
-            ),
-            _buildProfileOption(
-              icon: Icons.notifications_none_rounded,
-              label: 'Notifications',
-              onTap: () {},
-            ),
-            _buildProfileOption(
-              icon: Icons.help_outline_rounded,
-              label: 'Help Center',
-              onTap: () {},
-            ),
-            const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -104,37 +88,6 @@ class SellerProfilePage extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildProfileOption({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: const Color(0xFF64748B)),
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-        trailing: const Icon(
-          Icons.chevron_right_rounded,
-          color: Color(0xFF64748B),
-        ),
-        onTap: onTap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }

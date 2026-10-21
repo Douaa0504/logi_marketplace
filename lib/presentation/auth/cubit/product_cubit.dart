@@ -3,15 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/entities/product_entity.dart';
 import '../../../domain/repositories/product_repository.dart';
 import '../../../domain/usecases/add_product_usecase.dart';
+import '../../../domain/usecases/update_product_usecase.dart';
 import 'product_state.dart';
 
 class ProductCubit extends Cubit<ProductState> {
   final ProductRepository productRepository;
   final AddProductUseCase addProductUseCase;
+  final UpdateProductUseCase updateProductUseCase;
 
   ProductCubit({
     required this.productRepository,
     required this.addProductUseCase,
+    required this.updateProductUseCase,
   }) : super(ProductInitial());
 
   Future<void> addProduct({
@@ -36,6 +39,34 @@ class ProductCubit extends Cubit<ProductState> {
       );
 
       await addProductUseCase(newProduct, imageFile);
+      emit(ProductSuccess());
+    } catch (e) {
+      emit(ProductError(message: e.toString()));
+    }
+  }
+
+  Future<void> updateProduct({
+    required ProductEntity product,
+    required String title,
+    required String description,
+    required double price,
+    required String category,
+    File? imageFile,
+  }) async {
+    emit(ProductLoading());
+    try {
+      final updatedProduct = ProductEntity(
+        id: product.id,
+        sellerId: product.sellerId,
+        title: title,
+        description: description,
+        price: price,
+        category: category,
+        imageUrl: product.imageUrl,
+        createdAt: product.createdAt,
+      );
+
+      await updateProductUseCase(updatedProduct, imageFile);
       emit(ProductSuccess());
     } catch (e) {
       emit(ProductError(message: e.toString()));

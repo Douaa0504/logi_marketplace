@@ -36,6 +36,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
       final currentUserId = Supabase.instance.client.auth.currentUser?.id;
       if (currentUserId != null) {
         final orders = await _orderRepository.getSellerOrders(currentUserId);
+        if (!mounted) return;
         setState(() {
           _orders = orders;
           _isLoading = false;
@@ -47,6 +48,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
@@ -57,11 +59,13 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
   Future<void> _updateStatus(String orderId, String newStatus) async {
     try {
       await _orderRepository.updateOrderStatus(orderId, newStatus);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Order status updated to $newStatus')),
       );
-      _fetchOrders();
+      await _fetchOrders();
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to update status: $e')));

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../analytics/seller_analytics_page.dart';
+import '../orders/seller_orders_page.dart';
 import '../products/seller_products_page.dart';
 import '../profile/seller_profile_page.dart';
 
@@ -15,6 +16,7 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
 
   final List<Widget> _pages = [
     const SellerAnalyticsPage(),
+    const SellerOrdersPage(),
     const SellerProductsPage(),
     const SellerProfilePage(),
   ];
@@ -43,6 +45,11 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
               icon: Icon(Icons.analytics_outlined),
               activeIcon: Icon(Icons.analytics),
               label: 'Analytics',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.receipt_long_outlined),
+              activeIcon: Icon(Icons.receipt_long),
+              label: 'Orders',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.inventory_2_outlined),
