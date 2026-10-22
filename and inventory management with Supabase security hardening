@@ -1,0 +1,183 @@
+[1mdiff --git a/lib/core/storage/app_storage.dart b/lib/core/storage/app_storage.dart[m
+[1mindex 79c0360..c793225 100644[m
+[1m--- a/lib/core/storage/app_storage.dart[m
+[1m+++ b/lib/core/storage/app_storage.dart[m
+[36m@@ -6,14 +6,18 @@[m [mclass AppStorage {[m
+   AppStorage._internal();[m
+ [m
+   static const String _authBoxName = 'auth_box';[m
+[32m+[m[32m  static const String _settingsBoxName = 'settings_box';[m
+   static const String _roleKey = 'user_role';[m
+[32m+[m[32m  static const String _themeModeKey = 'theme_mode';[m
+ [m
+   late Box _authBox;[m
+[32m+[m[32m  late Box _settingsBox;[m
+ [m
+   // Initialize Hive and open the local storage box[m
+   Future<void> init() async {[m
+     await Hive.initFlutter();[m
+     _authBox = await Hive.openBox(_authBoxName);[m
+[32m+[m[32m    _settingsBox = await Hive.openBox(_settingsBoxName);[m
+   }[m
+ [m
+   // Save the validated user role dynamically[m
+[36m@@ -26,6 +30,14 @@[m [mclass AppStorage {[m
+     return _authBox.get(_roleKey) as String?;[m
+   }[m
+ [m
+[32m+[m[32m  String? getThemeMode() {[m
+[32m+[m[32m    return _settingsBox.get(_themeModeKey) as String?;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  Future<void> saveThemeMode(String themeMode) async {[m
+[32m+[m[32m    await _settingsBox.put(_themeModeKey, themeMode);[m
+[32m+[m[32m  }[m
+[32m+[m
+   // Clear local session data during logout[m
+   Future<void> clearAuthData() async {[m
+     await _authBox.clear();[m
+[1mdiff --git a/lib/data/datasources/product_remote_datasource.dart b/lib/data/datasources/product_remote_datasource.dart[m
+[1mindex 811f175..ba2b986 100644[m
+[1m--- a/lib/data/datasources/product_remote_datasource.dart[m
+[1m+++ b/lib/data/datasources/product_remote_datasource.dart[m
+[36m@@ -1,5 +1,6 @@[m
+ import 'dart:io';[m
+ import 'package:supabase_flutter/supabase_flutter.dart';[m
+[32m+[m[32mimport '../../domain/entities/product_inventory_option_entity.dart';[m
+ import '../models/product_model.dart';[m
+ [m
+ /// Storage bucket for product photos. Confirm this exact name exists in[m
+[36m@@ -11,6 +12,8 @@[m [mabstract class ProductRemoteDataSource {[m
+   Future<List<ProductModel>> fetchProducts();[m
+   Future<List<ProductModel>> getProductsBySeller(String sellerId);[m
+   Future<ProductModel> addProduct(ProductModel product, File? imageFile);[m
+[32m+[m[32m  Future<ProductModel> updateProduct(ProductModel product, File? imageFile);[m
+[32m+[m[32m  Future<Map<String, dynamic>> getSellerProductInventory(String productId);[m
+ }[m
+ [m
+ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {[m
+[36m@@ -37,6 +40,23 @@[m [mclass ProductRemoteDataSourceImpl implements ProductRemoteDataSource {[m
+     return value.trim();[m
+   }[m
+ [m
+[32m+[m[32m  Future<String> _uploadProductImage(File imageFile, String title) async {[m
+[32m+[m[32m    final safeTitle = _sanitizeStorageFileName(title);[m
+[32m+[m[32m    final fileName = '${DateTime.now().millisecondsSinceEpoch}_$safeTitle.jpg';[m
+[32m+[m[32m    final path = 'products/$fileName';[m
+[32m+[m
+[32m+[m[32m    await supabaseClient.storage[m
+[32m+[m[32m        .from(productImagesStorageBucket)[m
+[32m+[m[32m        .upload([m
+[32m+[m[32m          path,[m
+[32m+[m[32m          imageFile,[m
+[32m+[m[32m          fileOptions: const FileOptions(cacheControl: '3600', upsert: false),[m
+[32m+[m[32m        );[m
+[32m+[m[32m    return supabaseClient.storage[m
+[32m+[m[32m        .from(productImagesStorageBucket)[m
+[32m+[m[32m        .getPublicUrl(path);[m
+[32m+[m[32m  }[m
+[32m+[m
+   @override[m
+   Future<List<ProductModel>> getProducts() async {[m
+     final response = await supabaseClient[m
+[36m@@ -44,9 +64,10 @@[m [mclass ProductRemoteDataSourceImpl implements ProductRemoteDataSource {[m
+         .select()[m
+         .order('created_at', ascending: false);[m
+ [m
+[31m-    return (response as List)[m
+[32m+[m[32m    final products = (response as List)[m
+         .map((json) => ProductModel.fromJson(json))[m
+         .toList();[m
+[32m+[m[32m    return _loadPublicInventoryOptions(products);[m
+   }[m
+ [m
+   @override[m
+[36m@@ -62,34 +83,17 @@[m [mclass ProductRemoteDataSourceImpl implements ProductRemoteDataSource {[m
+         .eq('seller_id', sellerId)[m
+         .order('created_at', ascending: false);[m
+ [m
+[31m-    return (response as List)[m
+[32m+[m[32m    final products = (response as List)[m
+         .map((json) => ProductModel.fromJson(json))[m
+         .toList();[m
+[32m+[m[32m    return _loadPublicInventoryOptions(products);[m
+   }[m
+ [m
+   @override[m
+   Future<ProductModel> addProduct(ProductModel product, File? imageFile) async {[m
+[31m-    String? imageUrl;[m
+[31m-[m
+[31m-    if (imageFile != null) {[m
+[31m-      final safeTitle = _sanitizeStorageFileName(product.title);[m
+[31m-      final fileName =[m
+[31m-          '${DateTime.now().millisecondsSinceEpoch}_$safeTitle.jpg';[m
+[31m-      final path = 'products/$fileName';[m
+[31m-[m
+[31m-      await supabaseClient.storage[m
+[31m-          .from(productImagesStorageBucket)[m
+[31m-          .upload([m
+[31m-            path,[m
+[31m-            imageFile,[m
+[31m-            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),[m
+[31m-          );[m
+[31m-      imageUrl = supabaseClient.storage[m
+[31m-          .from(productImagesStorageBucket)[m
+[31m-          .getPublicUrl(path);[m
+[31m-    } else {[m
+[31m-      imageUrl = _remoteImageUrlOrNull(product.imageUrl);[m
+[31m-    }[m
+[32m+[m[32m    final imageUrl = imageFile != null[m
+[32m+[m[32m        ? await _uploadProductImage(imageFile, product.title)[m
+[32m+[m[32m        : _remoteImageUrlOrNull(product.imageUrl);[m
+ [m
+     final productData = Map<String, dynamic>.from(product.toJson());[m
+     final id = productData['id'];[m
+[36m@@ -104,6 +108,125 @@[m [mclass ProductRemoteDataSourceImpl implements ProductRemoteDataSource {[m
+         .select()[m
+         .single();[m
+ [m
+[31m-    return ProductModel.fromJson(response);[m
+[32m+[m[32m    final createdProduct = ProductModel.fromJson(response);[m
+[32m+[m[32m    await _saveSellerInventory(createdProduct.id, product);[m
+[32m+[m[32m    return createdProduct.withInventoryOptions([m
+[32m+[m[32m      product.inventoryOptions,[m
+[32m+[m[32m      inventoryMode: product.inventoryMode,[m
+[32m+[m[32m    );[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  @override[m
+[32m+[m[32m  Future<ProductModel> updateProduct([m
+[32m+[m[32m    ProductModel product,[m
+[32m+[m[32m    File? imageFile,[m
+[32m+[m[32m  ) async {[m
+[32m+[m[32m    final imageUrl = imageFile != null[m
+[32m+[m[32m        ? await _uploadProductImage(imageFile, product.title)[m
+[32m+[m[32m        : product.imageUrl;[m
+[32m+[m[32m    final productData = Map<String, dynamic>.from(product.toJson())[m
+[32m+[m[32m      ..remove('id')[m
+[32m+[m[32m      ..remove('seller_id')[m
+[32m+[m[32m      ..remove('created_at')[m
+[32m+[m[32m      ..['image_url'] = imageUrl;[m
+[32m+[m
+[32m+[m[32m    final response = await supabaseClient[m
+[32m+[m[32m        .from('products')[m
+[32m+[m[32m        .update(productData)[m
+[32m+[m[32m        .eq('id', product.id)[m
+[32m+[m[32m        .eq('seller_id', product.sellerId)[m
+[32m+[m[32m        .select()[m
+[32m+[m[32m        .single();[m
+[32m+[m
+[32m+[m[32m    await _saveSellerInventory(product.id, product);[m
+[32m+[m[32m    return ProductModel.fromJson(response).withInventoryOptions([m
+[32m+[m[32m      product.inventoryOptions,[m
+[32m+[m[32m      inventoryMode: product.inventoryMode,[m
+[32m+[m[32m    );[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  @override[m
+[32m+[m[32m  Future<Map<String, dynamic>> getSellerProductInventory([m
+[32m+[m[32m    String productId,[m
+[32m+[m[32m  ) async {[m
+[32m+[m[32m    final response = await supabaseClient.rpc([m
+[32m+[m[32m      'get_seller_product_inventory',[m
+[32m+[m[32m      params: {'p_prod

@@ -26,12 +26,38 @@ class ProductRepositoryImpl implements ProductRepository {
       imageUrl: product.imageUrl,
       category: product.category,
       createdAt: product.createdAt,
+      inventoryMode: product.inventoryMode,
+      inventoryOptions: product.inventoryOptions,
     );
     await remoteDataSource.addProduct(model, imageFile);
   }
 
   @override
+  Future<void> updateProduct(ProductEntity product, [File? imageFile]) async {
+    final model = ProductModel(
+      id: product.id,
+      sellerId: product.sellerId,
+      title: product.title,
+      description: product.description,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      category: product.category,
+      createdAt: product.createdAt,
+      inventoryMode: product.inventoryMode,
+      inventoryOptions: product.inventoryOptions,
+    );
+    await remoteDataSource.updateProduct(model, imageFile);
+  }
+
+  @override
   Future<List<ProductEntity>> getProducts() async {
     return remoteDataSource.getProducts();
+  }
+
+  @override
+  Future<Map<String, dynamic>> getSellerProductInventory(
+    String productId,
+  ) {
+    return remoteDataSource.getSellerProductInventory(productId);
   }
 }

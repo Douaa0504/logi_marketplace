@@ -5,11 +5,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Storage
 import 'package:logi_marketplace/core/storage/app_storage.dart';
+import 'package:logi_marketplace/core/theme/theme_cubit.dart';
 
 // Auth Layer
 import 'package:logi_marketplace/data/datasources/auth_remote_datasource.dart';
 import 'package:logi_marketplace/data/repositories/auth_repository_impl.dart';
+import 'package:logi_marketplace/data/repositories/supabase_favorites_repository.dart';
 import 'package:logi_marketplace/domain/repositories/auth_repository.dart';
+import 'package:logi_marketplace/domain/repositories/favorites_repository.dart';
 import 'package:logi_marketplace/domain/usecases/sign_in_usecase.dart';
 import 'package:logi_marketplace/domain/usecases/sign_up_usecase.dart';
 import 'package:logi_marketplace/presentation/auth/cubit/auth_cubit.dart';
@@ -20,8 +23,10 @@ import 'package:logi_marketplace/data/datasources/product_remote_datasource.dart
 import 'package:logi_marketplace/data/repositories/product_repository_impl.dart';
 import 'package:logi_marketplace/domain/repositories/product_repository.dart';
 import 'package:logi_marketplace/domain/usecases/add_product_usecase.dart';
+import 'package:logi_marketplace/domain/usecases/update_product_usecase.dart';
 import 'package:logi_marketplace/presentation/auth/cubit/product_cubit.dart';
 import 'package:logi_marketplace/presentation/buyer/home/cubit/buyer_home_cubit.dart';
+import 'package:logi_marketplace/presentation/buyer/favorites/favorites_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,12 +69,17 @@ class LogiMarketplaceApp extends StatelessWidget {
       supabaseClient: supabaseClient,
       remoteDataSource: productDataSource,
     );
+    final favoritesRepository = SupabaseFavoritesRepository(supabaseClient);
     final addProductUseCase = AddProductUseCase(productRepository);
+    final updateProductUseCase = UpdateProductUseCase(productRepository);
 
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<AuthRepository>.value(value: authRepository),
         RepositoryProvider<ProductRepository>.value(value: productRepository),
+        RepositoryProvider<FavoritesRepository>.value(
+          value: favoritesRepository,
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -83,6 +93,7 @@ class LogiMarketplaceApp extends StatelessWidget {
           BlocProvider<ProductCubit>(
             create: (context) => ProductCubit(
               addProductUseCase: addProductUseCase,
+              updateProductUseCase: updateProductUseCase,
               productRepository: productRepository,
             ),
           ),
@@ -90,18 +101,46 @@ class LogiMarketplaceApp extends StatelessWidget {
             create: (context) =>
                 BuyerHomeCubit(productRepository)..loadHomeData(),
           ),
-        ],
-        child: MaterialApp(
-          title: 'LogiMarketplace',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.indigo,
-              brightness: Brightness.light,
-            ),
+          BlocProvider<FavoritesCubit>(
+            create: (context) =>
+                FavoritesCubit(favoritesRepository, productRepository),
           ),
-          home: const SplashPage(),
+          BlocProvider<ThemeCubit>(
+            create: (_) {
+              final appStorage = AppStorage();
+              final initialThemeMode = appStorage.getThemeMode() ==
+                      ThemeMode.dark.name
+                  ? ThemeMode.dark
+                  : ThemeMode.light;
+              return ThemeCubit(
+                initialThemeMode: initialThemeMode,
+                saveThemeMode: (themeMode) =>
+                    appStorage.saveThemeMode(themeMode.name),
+              );
+            },
+          ),
+        ],
+        child: BlocBuilder<ThemeCubit, ThemeMode>(
+          builder: (context, themeMode) => MaterialApp(
+            title: 'LogiMarketplace',
+            debugShowCheckedModeBanner: false,
+            themeMode: themeMode,
+            theme: ThemeData(
+              useMaterial3: true,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.indigo,
+                brightness: Brightness.light,
+              ),
+            ),
+            darkTheme: ThemeData(
+              useMaterial3: true,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.indigo,
+                brightness: Brightness.dark,
+              ),
+            ),
+            home: const SplashPage(),
+          ),
         ),
       ),
     );

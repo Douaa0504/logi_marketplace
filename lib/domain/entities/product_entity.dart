@@ -1,3 +1,5 @@
+import 'product_inventory_option_entity.dart';
+
 class ProductEntity {
   final String id;
   final String sellerId;
@@ -7,6 +9,8 @@ class ProductEntity {
   final String? imageUrl;
   final String category;
   final DateTime createdAt;
+  final String inventoryMode;
+  final List<ProductInventoryOptionEntity> inventoryOptions;
 
   ProductEntity({
     required this.id,
@@ -17,6 +21,8 @@ class ProductEntity {
     this.imageUrl,
     required this.category,
     required this.createdAt,
+    this.inventoryMode = 'unconfigured',
+    this.inventoryOptions = const [],
   });
 
   /// Public HTTP(S) URL only. Local device paths are treated as missing.

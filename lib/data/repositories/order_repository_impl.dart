@@ -31,9 +31,9 @@ class OrderRepositoryImpl {
   }
 
   Future<void> updateOrderStatus(String orderId, String newStatus) async {
-    await supabaseClient
-        .from('orders')
-        .update({'status': newStatus})
-        .eq('id', orderId);
+    await supabaseClient.rpc(
+      'seller_update_order_status',
+      params: {'p_order_id': orderId, 'p_new_status': newStatus},
+    );
   }
 }

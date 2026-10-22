@@ -3,12 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logi_marketplace/core/navigation/app_router.dart';
 import '../../../../auth/cubit/auth_cubit.dart';
 import '../../../../auth/pages/cart_page.dart';
+import '../../../favorites/favorites_page.dart';
+import '../../../../shared/settings_page.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   const HomeAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -16,10 +19,10 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'LogiMarket',
             style: TextStyle(
-              color: Color(0xFF0F172A),
+              color: colors.onSurface,
               fontWeight: FontWeight.bold,
               fontSize: 24,
               letterSpacing: -0.5,
@@ -28,7 +31,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           Text(
             'Welcome back, discover products!',
             style: TextStyle(
-              color: Colors.grey[600],
+              color: colors.onSurfaceVariant,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -39,17 +42,30 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           onPressed: () => Navigator.push(
             context,
+            MaterialPageRoute(builder: (_) => const FavoritesPage()),
+          ),
+          icon: Icon(Icons.favorite_border, color: colors.onSurface),
+          tooltip: 'Favorites',
+        ),
+        IconButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SettingsPage()),
+          ),
+          icon: Icon(Icons.settings_outlined, color: colors.onSurface),
+          tooltip: 'Settings',
+        ),
+        IconButton(
+          onPressed: () => Navigator.push(
+            context,
             MaterialPageRoute(builder: (_) => const CartPage()),
           ),
-          icon: const Icon(
-            Icons.shopping_cart_outlined,
-            color: Color(0xFF0F172A),
-          ),
+          icon: Icon(Icons.shopping_cart_outlined, color: colors.onSurface),
           tooltip: 'Cart',
         ),
         IconButton(
           onPressed: () => _signOut(context),
-          icon: const Icon(Icons.logout_rounded, color: Color(0xFF0F172A)),
+          icon: Icon(Icons.logout_rounded, color: colors.onSurface),
           tooltip: 'Sign Out',
         ),
         const SizedBox(width: 8),

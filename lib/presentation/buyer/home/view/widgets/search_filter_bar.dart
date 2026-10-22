@@ -7,6 +7,7 @@ class SearchFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -16,7 +17,7 @@ class SearchFilterBar extends StatelessWidget {
               height: 54,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -28,19 +29,19 @@ class SearchFilterBar extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.search_rounded,
-                    color: Color(0xFF64748B),
+                    color: colors.onSurfaceVariant,
                     size: 22,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
                       onChanged: onSearchChanged,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'Search products...',
                         hintStyle: TextStyle(
-                          color: Color(0xFF64748B),
+                          color: colors.onSurfaceVariant,
                           fontSize: 14,
                         ),
                         border: InputBorder.none,

@@ -1,14 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../domain/repositories/product_repository.dart';
+import '../../favorites/favorites_cubit.dart';
 import '../cubit/buyer_home_cubit.dart';
 import 'widgets/home_app_bar.dart';
 import 'widgets/search_filter_bar.dart';
 import 'widgets/category_selector.dart';
 import 'widgets/product_grid_view.dart';
 
-class BuyerHomePage extends StatelessWidget {
+class BuyerHomePage extends StatefulWidget {
   const BuyerHomePage({super.key});
+
+  @override
+  State<BuyerHomePage> createState() => _BuyerHomePageState();
+}
+
+class _BuyerHomePageState extends State<BuyerHomePage> {
+  bool _favoritesLoadScheduled = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_favoritesLoadScheduled) return;
+    _favoritesLoadScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<FavoritesCubit>().loadFavorites();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +37,6 @@ class BuyerHomePage extends StatelessWidget {
           BuyerHomeCubit(context.read<ProductRepository>())..loadHomeData(),
       child: Builder(
         builder: (context) => Scaffold(
-          backgroundColor: Color(0xFFF8FAFC),
           appBar: HomeAppBar(),
           body: SafeArea(
             child: SingleChildScrollView(
@@ -38,7 +57,7 @@ class BuyerHomePage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -52,7 +71,7 @@ class BuyerHomePage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),

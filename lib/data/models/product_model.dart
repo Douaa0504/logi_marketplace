@@ -1,4 +1,5 @@
 import '../../domain/entities/product_entity.dart';
+import '../../domain/entities/product_inventory_option_entity.dart';
 
 class ProductModel extends ProductEntity {
   ProductModel({
@@ -10,6 +11,8 @@ class ProductModel extends ProductEntity {
     super.imageUrl,
     required super.category,
     required super.createdAt,
+    super.inventoryMode,
+    super.inventoryOptions,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +27,34 @@ class ProductModel extends ProductEntity {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
+      inventoryMode: json['inventory_mode'] as String? ?? 'unconfigured',
+      inventoryOptions:
+          (json['inventory_options'] as List<dynamic>? ?? [])
+              .map(
+                (option) => ProductInventoryOptionEntity.fromJson(
+                  Map<String, dynamic>.from(option as Map),
+                ),
+              )
+              .toList(),
+    );
+  }
+
+  ProductModel withInventoryOptions(
+    List<ProductInventoryOptionEntity> inventoryOptions, {
+    String? inventoryMode,
+  }
+  ) {
+    return ProductModel(
+      id: id,
+      sellerId: sellerId,
+      title: title,
+      description: description,
+      price: price,
+      imageUrl: imageUrl,
+      category: category,
+      createdAt: createdAt,
+      inventoryMode: inventoryMode ?? this.inventoryMode,
+      inventoryOptions: inventoryOptions,
     );
   }
 

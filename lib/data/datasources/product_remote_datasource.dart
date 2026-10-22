@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../domain/entities/product_inventory_option_entity.dart';
 import '../models/product_model.dart';
 
 /// Storage bucket for product photos. Confirm this exact name exists in
@@ -11,6 +12,8 @@ abstract class ProductRemoteDataSource {
   Future<List<ProductModel>> fetchProducts();
   Future<List<ProductModel>> getProductsBySeller(String sellerId);
   Future<ProductModel> addProduct(ProductModel product, File? imageFile);
+  Future<ProductModel> updateProduct(ProductModel product, File? imageFile);
+  Future<Map<String, dynamic>> getSellerProductInventory(String productId);
 }
 
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
@@ -37,6 +40,23 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     return value.trim();
   }
 
+  Future<String> _uploadProductImage(File imageFile, String title) async {
+    final safeTitle = _sanitizeStorageFileName(title);
+    final fileName = '${DateTime.now().millisecondsSinceEpoch}_$safeTitle.jpg';
+    final path = 'products/$fileName';
+
+    await supabaseClient.storage
+        .from(productImagesStorageBucket)
+        .upload(
+          path,
+          imageFile,
+          fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+        );
+    return supabaseClient.storage
+        .from(productImagesStorageBucket)
+        .getPublicUrl(path);
+  }
+
   @override
   Future<List<ProductModel>> getProducts() async {
     final response = await supabaseClient
@@ -44,9 +64,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
         .select()
         .order('created_at', ascending: false);
 
-    return (response as List)
+    final products = (response as List)
         .map((json) => ProductModel.fromJson(json))
         .toList();
+    return _loadPublicInventoryOptions(products);
   }
 
   @override
@@ -62,34 +83,17 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
         .eq('seller_id', sellerId)
         .order('created_at', ascending: false);
 
-    return (response as List)
+    final products = (response as List)
         .map((json) => ProductModel.fromJson(json))
         .toList();
+    return _loadPublicInventoryOptions(products);
   }
 
   @override
   Future<ProductModel> addProduct(ProductModel product, File? imageFile) async {
-    String? imageUrl;
-
-    if (imageFile != null) {
-      final safeTitle = _sanitizeStorageFileName(product.title);
-      final fileName =
-          '${DateTime.now().millisecondsSinceEpoch}_$safeTitle.jpg';
-      final path = 'products/$fileName';
-
-      await supabaseClient.storage
-          .from(productImagesStorageBucket)
-          .upload(
-            path,
-            imageFile,
-            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-          );
-      imageUrl = supabaseClient.storage
-          .from(productImagesStorageBucket)
-          .getPublicUrl(path);
-    } else {
-      imageUrl = _remoteImageUrlOrNull(product.imageUrl);
-    }
+    final imageUrl = imageFile != null
+        ? await _uploadProductImage(imageFile, product.title)
+        : _remoteImageUrlOrNull(product.imageUrl);
 
     final productData = Map<String, dynamic>.from(product.toJson());
     final id = productData['id'];
@@ -104,6 +108,125 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
         .select()
         .single();
 
-    return ProductModel.fromJson(response);
+    final createdProduct = ProductModel.fromJson(response);
+    await _saveSellerInventory(createdProduct.id, product);
+    return createdProduct.withInventoryOptions(
+      product.inventoryOptions,
+      inventoryMode: product.inventoryMode,
+    );
+  }
+
+  @override
+  Future<ProductModel> updateProduct(
+    ProductModel product,
+    File? imageFile,
+  ) async {
+    final imageUrl = imageFile != null
+        ? await _uploadProductImage(imageFile, product.title)
+        : product.imageUrl;
+    final productData = Map<String, dynamic>.from(product.toJson())
+      ..remove('id')
+      ..remove('seller_id')
+      ..remove('created_at')
+      ..['image_url'] = imageUrl;
+
+    final response = await supabaseClient
+        .from('products')
+        .update(productData)
+        .eq('id', product.id)
+        .eq('seller_id', product.sellerId)
+        .select()
+        .single();
+
+    await _saveSellerInventory(product.id, product);
+    return ProductModel.fromJson(response).withInventoryOptions(
+      product.inventoryOptions,
+      inventoryMode: product.inventoryMode,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> getSellerProductInventory(
+    String productId,
+  ) async {
+    final response = await supabaseClient.rpc(
+      'get_seller_product_inventory',
+      params: {'p_product_id': productId},
+    );
+    return Map<String, dynamic>.from(response as Map);
+  }
+
+  Future<void> _saveSellerInventory(
+    String productId,
+    ProductModel product,
+  ) async {
+    final options = product.inventoryOptions;
+    if (product.inventoryMode == 'simple') {
+      final simpleOption = options.where(
+        (option) => option.color == null && option.size == null,
+      );
+      if (simpleOption.length != 1 || simpleOption.single.stockQuantity == null) {
+        throw StateError('A simple product requires one stock quantity.');
+      }
+      await supabaseClient.rpc(
+        'save_seller_product_inventory',
+        params: {
+          'p_product_id': productId,
+          'p_mode': 'simple',
+          'p_simple_stock': simpleOption.single.stockQuantity,
+          'p_options': [],
+        },
+      );
+      return;
+    }
+
+    if (product.inventoryMode != 'variants' || options.isEmpty) {
+      throw StateError('Configure simple stock or at least one product variant.');
+    }
+    await supabaseClient.rpc(
+      'save_seller_product_inventory',
+      params: {
+        'p_product_id': productId,
+        'p_mode': 'variants',
+        'p_simple_stock': null,
+        'p_options': options
+            .map(
+              (option) => {
+                'color': option.color,
+                'size': option.size,
+                'stock_quantity': option.stockQuantity,
+              },
+            )
+            .toList(),
+      },
+    );
+  }
+
+  Future<List<ProductModel>> _loadPublicInventoryOptions(
+    List<ProductModel> products,
+  ) async {
+    if (products.isEmpty) return products;
+
+    final productIds = products.map((product) => product.id).toList();
+    final response = await supabaseClient
+        .from('product_inventory_options')
+        .select()
+        .inFilter('product_id', productIds);
+    final optionsByProduct = <String, List<ProductInventoryOptionEntity>>{};
+    for (final row in response as List<dynamic>) {
+      final option = ProductInventoryOptionEntity.fromJson(
+        Map<String, dynamic>.from(row as Map),
+      );
+      final productId = row['product_id'].toString();
+      optionsByProduct.putIfAbsent(productId, () => []).add(option);
+    }
+
+    return products
+        .map(
+          (product) => product.withInventoryOptions(
+            optionsByProduct[product.id] ?? const [],
+          ),
+        )
+        .toList();
   }
 }

@@ -140,7 +140,7 @@ class _AuthPageState extends State<AuthPage> {
                         height: 80,
                         width: 80,
                         decoration: BoxDecoration(
-                          color: activeColor.withOpacity(0.1),
+                          color: activeColor.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -295,7 +295,7 @@ class _AuthPageState extends State<AuthPage> {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),

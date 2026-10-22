@@ -117,7 +117,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
+                          color: Colors.black.withValues(alpha: 0.04),
                           blurRadius: 10,
                         ),
                       ],
@@ -181,7 +181,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                                 decoration: BoxDecoration(
                                   color: _getStatusColor(
                                     order.status,
-                                  ).withOpacity(0.1),
+                                  ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(

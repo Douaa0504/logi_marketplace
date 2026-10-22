@@ -147,6 +147,11 @@ class _CartPageState extends State<CartPage> {
                                         fontSize: 16,
                                       ),
                                     ),
+                                    if (item.product.inventoryMode ==
+                                        'variants') ...[
+                                      const SizedBox(height: 4),
+                                      Text(item.inventoryOption.label),
+                                    ],
                                     const SizedBox(height: 4),
                                     Text(
                                       '\$${item.product.price.toStringAsFixed(2)}',
@@ -168,6 +173,8 @@ class _CartPageState extends State<CartPage> {
                                         _cartService.updateQuantity(
                                           item.product.id,
                                           item.quantity - 1,
+                                          inventoryOptionId:
+                                              item.inventoryOption.id,
                                         ),
                                   ),
                                   Text(
@@ -182,6 +189,8 @@ class _CartPageState extends State<CartPage> {
                                         _cartService.updateQuantity(
                                           item.product.id,
                                           item.quantity + 1,
+                                          inventoryOptionId:
+                                              item.inventoryOption.id,
                                         ),
                                   ),
                                 ],

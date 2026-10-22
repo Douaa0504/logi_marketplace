@@ -2,17 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:logi_marketplace/data/services/cart_service.dart';
 import 'package:logi_marketplace/presentation/auth/pages/cart_page.dart';
 import '../../../../domain/entities/product_entity.dart';
+import '../../../../domain/entities/product_inventory_option_entity.dart';
 import '../../../shared/primary_button.dart';
+import '../../../shared/favorite_button.dart';
 
-class ProductDetailsPage extends StatelessWidget {
+class ProductDetailsPage extends StatefulWidget {
   final ProductEntity product;
 
   const ProductDetailsPage({super.key, required this.product});
 
   @override
+  State<ProductDetailsPage> createState() => _ProductDetailsPageState();
+}
+
+class _ProductDetailsPageState extends State<ProductDetailsPage> {
+  ProductInventoryOptionEntity? _selectedOption;
+
+  ProductEntity get product => widget.product;
+
+  bool get _canAddToCart {
+    if (product.inventoryMode == 'simple') {
+      return product.inventoryOptions.any(
+        (option) =>
+            option.color == null &&
+            option.size == null &&
+            option.isAvailable &&
+            option.isInStock,
+      );
+    }
+    return product.inventoryMode == 'variants' &&
+        _selectedOption != null &&
+        _selectedOption!.isAvailable &&
+        _selectedOption!.isInStock;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.surface,
       body: Stack(
         children: [
           CustomScrollView(
@@ -25,15 +53,17 @@ class ProductDetailsPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildProductHeader(),
+                      _buildProductHeader(context),
                       const SizedBox(height: 24),
-                      _buildSectionTitle('Description'),
+                      _buildInventorySelector(context),
+                      const SizedBox(height: 24),
+                      _buildSectionTitle(context, 'Description'),
                       const SizedBox(height: 12),
                       Text(
                         product.description ?? 'No description provided.',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
-                          color: Color(0xFF64748B),
+                          color: colors.onSurfaceVariant,
                           height: 1.6,
                         ),
                       ),
@@ -50,29 +80,90 @@ class ProductDetailsPage extends StatelessWidget {
     );
   }
 
+  Widget _buildInventorySelector(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    if (product.inventoryMode == 'unconfigured') {
+      return Text(
+        'This product is not available for purchase yet.',
+        style: TextStyle(color: colors.error),
+      );
+    }
+    if (product.inventoryMode == 'simple') {
+      return Text(
+        _canAddToCart ? 'In stock' : 'Out of stock',
+        style: TextStyle(color: colors.onSurfaceVariant),
+      );
+    }
+
+    if (product.inventoryOptions.isEmpty) {
+      return Text(
+        'No variants are currently available.',
+        style: TextStyle(color: colors.onSurfaceVariant),
+      );
+    }
+
+    return DropdownButtonFormField<String>(
+      initialValue: _selectedOption?.id,
+      decoration: const InputDecoration(
+        labelText: 'Choose a color or size',
+        border: OutlineInputBorder(),
+      ),
+      items: product.inventoryOptions.map((option) {
+        final available = option.isAvailable && option.isInStock;
+        final label = !option.isAvailable
+            ? '${option.label} (Unavailable)'
+            : option.isInStock
+            ? option.label
+            : '${option.label} (Out of stock)';
+        return DropdownMenuItem<String>(
+          value: option.id,
+          enabled: available,
+          child: Text(label),
+        );
+      }).toList(),
+      onChanged: (id) {
+        final matchingOptions = product.inventoryOptions.where(
+          (option) => option.id == id,
+        );
+        setState(() {
+          _selectedOption = matchingOptions.isEmpty
+              ? null
+              : matchingOptions.first;
+        });
+      },
+    );
+  }
+
   Widget _buildAppBar(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return SliverAppBar(
       expandedHeight: 400,
       pinned: true,
       elevation: 0,
-      backgroundColor: Colors.white,
+      backgroundColor: colors.surface,
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
-        icon: const CircleAvatar(
-          backgroundColor: Colors.white,
+        icon: CircleAvatar(
+          backgroundColor: colors.surface,
           child: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF0F172A),
+            color: colors.onSurface,
             size: 18,
           ),
         ),
       ),
-      actions: [const SizedBox(width: 8)],
+      actions: [
+        FavoriteButton(
+          product: product,
+          backgroundColor: colors.surface.withValues(alpha: 0.9),
+        ),
+        const SizedBox(width: 8),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
           tag: 'product_${product.id}',
           child: ColoredBox(
-            color: const Color(0xFFF1F5F9),
+            color: colors.surfaceContainerHighest,
             child: product.remoteImageUrl != null
                 ? Image.network(
                     product.remoteImageUrl!,
@@ -80,20 +171,20 @@ class ProductDetailsPage extends StatelessWidget {
                     width: double.infinity,
                     height: double.infinity,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Center(
+                      return Center(
                         child: Icon(
                           Icons.image_not_supported_outlined,
                           size: 64,
-                          color: Color(0xFF64748B),
+                          color: colors.onSurfaceVariant,
                         ),
                       );
                     },
                   )
-                : const Center(
+                : Center(
                     child: Icon(
                       Icons.image_not_supported_outlined,
                       size: 64,
-                      color: Color(0xFF64748B),
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
           ),
@@ -102,20 +193,21 @@ class ProductDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildProductHeader() {
+  Widget _buildProductHeader(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+            color: colors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(100),
           ),
           child: Text(
             product.category.toUpperCase(),
-            style: const TextStyle(
-              color: Color(0xFF2563EB),
+            style: TextStyle(
+              color: colors.primary,
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
@@ -125,34 +217,35 @@ class ProductDetailsPage extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           product.title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
+            color: colors.onSurface,
             letterSpacing: -0.5,
           ),
         ),
         const SizedBox(height: 12),
-        const Text(
+        Text(
           'Reviews are not available yet.',
-          style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+          style: TextStyle(color: colors.onSurfaceVariant, fontSize: 13),
         ),
       ],
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF0F172A),
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }
 
   Widget _buildStickyBottomBar(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Positioned(
       bottom: 0,
       left: 0,
@@ -160,7 +253,7 @@ class ProductDetailsPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.surface,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
@@ -177,16 +270,19 @@ class ProductDetailsPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Price',
-                    style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                    style: TextStyle(
+                      color: colors.onSurfaceVariant,
+                      fontSize: 14,
+                    ),
                   ),
                   Text(
                     '\$${product.price.toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2563EB),
+                      color: colors.primary,
                     ),
                   ),
                 ],
@@ -194,8 +290,12 @@ class ProductDetailsPage extends StatelessWidget {
               const SizedBox(width: 32),
               Expanded(
                 child: PrimaryButton(
-                  label: 'Add to Cart',
-                  onPressed: () => _addToCart(context),
+                  label:
+                      product.inventoryMode == 'variants' &&
+                          _selectedOption == null
+                      ? 'Select an option'
+                      : 'Add to Cart',
+                  onPressed: _canAddToCart ? () => _addToCart(context) : null,
                 ),
               ),
             ],
@@ -207,7 +307,7 @@ class ProductDetailsPage extends StatelessWidget {
 
   void _addToCart(BuildContext context) {
     try {
-      CartService().addToCart(product);
+      CartService().addToCart(product, option: _selectedOption);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${product.title} added to cart.'),
