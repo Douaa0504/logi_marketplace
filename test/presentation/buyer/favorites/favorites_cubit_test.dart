@@ -96,6 +96,12 @@ class _FakeProductRepository implements ProductRepository {
   ) async => {};
 
   @override
+  Future<String?> deleteProduct(String productId) async => null;
+
+  @override
+  Future<Map<String, dynamic>> getSellerFavoriteCounts() async => {};
+
+  @override
   Future<void> addProduct(ProductEntity product, [File? imageFile]) async {}
 
   @override

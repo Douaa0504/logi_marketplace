@@ -226,6 +226,7 @@ class _AddProductPageState extends State<AddProductPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.product == null ? 'Add New Product' : 'Edit Product'),
@@ -261,9 +262,9 @@ class _AddProductPageState extends State<AddProductPage> {
                   child: Container(
                     height: 180,
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: colors.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[400]!),
+                      border: Border.all(color: colors.outlineVariant),
                     ),
                     child: _selectedImage != null
                         ? ClipRRect(
@@ -284,13 +285,13 @@ class _AddProductPageState extends State<AddProductPage> {
                               ),
                             ),
                           )
-                        : const Column(
+                        : Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
                                 Icons.add_a_photo,
                                 size: 40,
-                                color: Colors.grey,
+                                color: colors.onSurfaceVariant,
                               ),
                               SizedBox(height: 8),
                               Text('Tap to select product image'),

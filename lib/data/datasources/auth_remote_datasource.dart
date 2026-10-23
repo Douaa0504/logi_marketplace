@@ -30,7 +30,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String fullName,
     required String role,
   }) async {
-    // نمرر البيانات في data لكي يستقبلها Trigger الخاص بـ Supabase
     return await supabaseClient.auth.signUp(
       email: email,
       password: password,

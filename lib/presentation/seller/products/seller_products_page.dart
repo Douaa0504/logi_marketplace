@@ -14,14 +14,49 @@ class SellerProductsPage extends StatefulWidget {
 }
 
 class _SellerProductsPageState extends State<SellerProductsPage> {
+  final Set<String> _deletingProductIds = {};
+  Map<String, int> _favoriteCounts = {};
+  bool _isLoadingFavoriteCounts = true;
+  String? _favoriteCountsError;
+
   @override
   void initState() {
     super.initState();
     _fetchProducts();
+    _fetchFavoriteCounts();
   }
 
   void _fetchProducts() {
     context.read<ProductCubit>().loadProducts();
+  }
+
+  Future<void> _fetchFavoriteCounts() async {
+    setState(() {
+      _isLoadingFavoriteCounts = true;
+      _favoriteCountsError = null;
+    });
+    try {
+      final response = await context
+          .read<ProductCubit>()
+          .getSellerFavoriteCounts();
+      final rawCounts = Map<String, dynamic>.from(
+        response['products'] as Map? ?? const {},
+      );
+      if (!mounted) return;
+      setState(() {
+        _favoriteCounts = rawCounts.map(
+          (productId, count) =>
+              MapEntry(productId, (count as num).toInt()),
+        );
+        _isLoadingFavoriteCounts = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _favoriteCountsError = error.toString();
+        _isLoadingFavoriteCounts = false;
+      });
+    }
   }
 
   Future<void> _editProduct(BuildContext context, ProductEntity product) async {
@@ -34,6 +69,60 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
     }
   }
 
+  Future<void> _deleteProduct(ProductEntity product) async {
+    if (_deletingProductIds.contains(product.id)) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete product permanently?'),
+        content: Text(
+          '“${product.title}” will be removed from your shop and favorites. '
+          'This cannot be undone. Historical orders will remain; products with '
+          'pending or accepted reserved orders cannot be deleted.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(dialogContext).colorScheme.error,
+              foregroundColor: Theme.of(dialogContext).colorScheme.onError,
+            ),
+            child: const Text('Confirm Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _deletingProductIds.add(product.id));
+    try {
+      final cleanupWarning = await context
+          .read<ProductCubit>()
+          .deleteProduct(product.id);
+      if (!mounted) return;
+      setState(() => _deletingProductIds.remove(product.id));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            cleanupWarning ?? 'Product deleted successfully.',
+          ),
+        ),
+      );
+      _fetchProducts();
+      _fetchFavoriteCounts();
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _deletingProductIds.remove(product.id));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not delete product: $error')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUserId = Supabase.instance.client.auth.currentUser?.id;
@@ -43,8 +132,12 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
         title: const Text('My Products'),
         actions: [
           IconButton(
+            tooltip: 'Refresh products and favorite counts',
             icon: const Icon(Icons.refresh),
-            onPressed: _fetchProducts,
+            onPressed: () {
+              _fetchProducts();
+              _fetchFavoriteCounts();
+            },
           ),
         ],
       ),
@@ -55,7 +148,8 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
             MaterialPageRoute(builder: (_) => const AddProductPage()),
           );
           if (result == true) {
-            _fetchProducts(); 
+            _fetchProducts();
+            _fetchFavoriteCounts();
           }
         },
         child: const Icon(Icons.add),
@@ -99,8 +193,11 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
               itemCount: sellerProducts.length,
               itemBuilder: (context, index) {
                 final product = sellerProducts[index];
+                final deleting = _deletingProductIds.contains(product.id);
+                final favoriteCount = _favoriteCounts[product.id];
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
+                  color: Theme.of(context).colorScheme.surface,
                   child: ListTile(
                     leading: product.remoteImageUrl != null
                         ? ClipRRect(
@@ -121,14 +218,33 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
                     ),
                     subtitle: Text(
                       '${product.category} • \$${product.price.toStringAsFixed(2)}\n'
-                      '${product.createdAt.toString().split(' ')[0]}',
+                      '${product.createdAt.toString().split(' ')[0]}\n'
+                      '${_favoriteCountsError != null ? 'Favorites unavailable' : _isLoadingFavoriteCounts ? 'Loading favorites…' : '${favoriteCount ?? 0} favorites'}',
                     ),
                     isThreeLine: true,
-                    trailing: IconButton(
-                      tooltip: 'Edit product',
-                      icon: const Icon(Icons.edit_outlined),
-                      onPressed: () => _editProduct(context, product),
-                    ),
+                    trailing: deleting
+                        ? const SizedBox.square(
+                            dimension: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Wrap(
+                            spacing: 0,
+                            children: [
+                              IconButton(
+                                tooltip: 'Edit product',
+                                icon: const Icon(Icons.edit_outlined),
+                                onPressed: () => _editProduct(context, product),
+                              ),
+                              IconButton(
+                                tooltip: 'Delete product',
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                                onPressed: () => _deleteProduct(product),
+                              ),
+                            ],
+                          ),
                   ),
                 );
               },

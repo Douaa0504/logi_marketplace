@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/product_inventory_option_entity.dart';
 import '../models/product_model.dart';
@@ -13,7 +14,9 @@ abstract class ProductRemoteDataSource {
   Future<List<ProductModel>> getProductsBySeller(String sellerId);
   Future<ProductModel> addProduct(ProductModel product, File? imageFile);
   Future<ProductModel> updateProduct(ProductModel product, File? imageFile);
+  Future<String?> deleteProduct(String productId);
   Future<Map<String, dynamic>> getSellerProductInventory(String productId);
+  Future<Map<String, dynamic>> getSellerFavoriteCounts();
 }
 
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
@@ -156,6 +159,91 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     return Map<String, dynamic>.from(response as Map);
   }
 
+  @override
+  Future<String?> deleteProduct(String productId) async {
+    final userId = supabaseClient.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('Sign in as the product owner to delete it.');
+    }
+    final product = await supabaseClient
+        .from('products')
+        .select('image_url')
+        .eq('id', productId)
+        .eq('seller_id', userId)
+        .single();
+    final orderReferences = await supabaseClient
+        .from('orders')
+        .select('id')
+        .eq('product_id', productId)
+        .limit(1);
+    await supabaseClient
+        .from('products')
+        .delete()
+        .eq('id', productId)
+        .eq('seller_id', userId)
+        .select('id')
+        .single();
+
+    final imageUrl = product['image_url'] as String?;
+    final imagePath = _ownedProductImagePath(imageUrl);
+    if (imagePath == null ||
+        imageUrl == null ||
+        (orderReferences as List).isNotEmpty) {
+      return null;
+    }
+    try {
+      final otherProductReferences = await supabaseClient
+          .from('products')
+          .select('id')
+          .eq('image_url', imageUrl)
+          .limit(1);
+      if ((otherProductReferences as List).isNotEmpty) return null;
+      await supabaseClient.storage.from(productImagesStorageBucket).remove([
+        imagePath,
+      ]);
+      return null;
+    } catch (error) {
+      debugPrint('Product was deleted but its image cleanup failed: $error');
+      return 'Product was deleted, but its image could not be removed.';
+    }
+  }
+
+  String? _ownedProductImagePath(String? imageUrl) {
+    if (imageUrl == null || imageUrl.trim().isEmpty) return null;
+    final uri = Uri.tryParse(imageUrl.trim());
+    if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) {
+      return null;
+    }
+    final segments = uri.pathSegments;
+    if (segments.length != 7 ||
+        segments[0] != 'storage' ||
+        segments[1] != 'v1' ||
+        segments[2] != 'object' ||
+        segments[3] != 'public' ||
+        segments[4] != productImagesStorageBucket ||
+        segments[5] != 'products' ||
+        segments[6].isEmpty) {
+      return null;
+    }
+
+    final path = segments.skip(5).join('/');
+    final expectedUri = Uri.parse(
+      supabaseClient.storage
+          .from(productImagesStorageBucket)
+          .getPublicUrl(path),
+    );
+    if (uri.origin != expectedUri.origin || uri.path != expectedUri.path) {
+      return null;
+    }
+    return path;
+  }
+
+  @override
+  Future<Map<String, dynamic>> getSellerFavoriteCounts() async {
+    final response = await supabaseClient.rpc('get_seller_favorite_counts');
+    return Map<String, dynamic>.from(response as Map);
+  }
+
   Future<void> _saveSellerInventory(
     String productId,
     ProductModel product,
@@ -165,7 +253,8 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       final simpleOption = options.where(
         (option) => option.color == null && option.size == null,
       );
-      if (simpleOption.length != 1 || simpleOption.single.stockQuantity == null) {
+      if (simpleOption.length != 1 ||
+          simpleOption.single.stockQuantity == null) {
         throw StateError('A simple product requires one stock quantity.');
       }
       await supabaseClient.rpc(
@@ -181,7 +270,9 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     }
 
     if (product.inventoryMode != 'variants' || options.isEmpty) {
-      throw StateError('Configure simple stock or at least one product variant.');
+      throw StateError(
+        'Configure simple stock or at least one product variant.',
+      );
     }
     await supabaseClient.rpc(
       'save_seller_product_inventory',

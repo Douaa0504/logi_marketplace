@@ -13,15 +13,16 @@ class SellerProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
     final role = AppStorage().getUserRole() ?? 'Seller';
+    final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           'Store Profile',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         elevation: 0,
         centerTitle: true,
       ),
@@ -29,27 +30,35 @@ class SellerProfilePage extends StatelessWidget {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 50,
-              backgroundColor: Color(0xFF2563EB),
-              child: Icon(Icons.storefront, size: 50, color: Colors.white),
+              backgroundColor: colors.primary,
+              child: Icon(
+                Icons.storefront,
+                size: 50,
+                color: colors.onPrimary,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               user?.email ?? 'Seller Name',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: colors.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+                color: colors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 role.toUpperCase(),
-                style: const TextStyle(
-                  color: Color(0xFF2563EB),
+                style: TextStyle(
+                  color: colors.primary,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
@@ -87,8 +96,8 @@ class SellerProfilePage extends StatelessWidget {
                 icon: const Icon(Icons.logout_rounded),
                 label: const Text('Disconnect Store'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  foregroundColor: Colors.white,
+                  backgroundColor: colors.error,
+                  foregroundColor: colors.onError,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),

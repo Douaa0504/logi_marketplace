@@ -9,18 +9,12 @@ class AuthCubit extends Cubit<AuthState> {
   final SignInUseCase signInUseCase;
   final SignUpUseCase signUpUseCase;
   final AuthRepository authRepository;
-  String _currentRole = 'buyer';
 
   AuthCubit({
     required this.signInUseCase,
     required this.signUpUseCase,
     required this.authRepository,
   }) : super(AuthInitial());
-
-  void toggleRole(String newRole) {
-    _currentRole = newRole;
-    emit(AuthInitial(selectedRole: _currentRole));
-  }
 
   Future<void> registerUser({
     required String email,
@@ -73,6 +67,6 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> signOut() async {
     await authRepository.signOut();
     await AppStorage().clearAuthData();
-    emit(AuthInitial(selectedRole: 'buyer'));
+    emit(AuthInitial());
   }
 }

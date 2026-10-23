@@ -95,4 +95,12 @@ class ProductCubit extends Cubit<ProductState> {
   Future<Map<String, dynamic>> getSellerProductInventory(String productId) {
     return productRepository.getSellerProductInventory(productId);
   }
+
+  Future<String?> deleteProduct(String productId) {
+    return productRepository.deleteProduct(productId);
+  }
+
+  Future<Map<String, dynamic>> getSellerFavoriteCounts() {
+    return productRepository.getSellerFavoriteCounts();
+  }
 }

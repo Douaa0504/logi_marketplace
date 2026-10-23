@@ -9,7 +9,7 @@ import 'package:logi_marketplace/presentation/auth/cubit/product_cubit.dart';
 import 'package:logi_marketplace/presentation/auth/cubit/product_state.dart';
 
 void main() {
-  group('ProductCubit.updateProduct', () {
+  group('ProductCubit', () {
     test(
       'updates editable fields and preserves existing product identity',
       () async {
@@ -54,11 +54,27 @@ void main() {
         await cubit.close();
       },
     );
+
+    test('deleteProduct delegates the requested product ID', () async {
+      final repository = _FakeProductRepository();
+      final cubit = ProductCubit(
+        productRepository: repository,
+        addProductUseCase: AddProductUseCase(repository),
+        updateProductUseCase: UpdateProductUseCase(repository),
+      );
+
+      final warning = await cubit.deleteProduct('product-id');
+
+      expect(repository.deletedProductId, 'product-id');
+      expect(warning, 'image cleanup warning');
+      await cubit.close();
+    });
   });
 }
 
 class _FakeProductRepository implements ProductRepository {
   ProductEntity? updatedProduct;
+  String? deletedProductId;
 
   @override
   Future<List<ProductEntity>> getProducts() async => [];
@@ -67,6 +83,15 @@ class _FakeProductRepository implements ProductRepository {
   Future<Map<String, dynamic>> getSellerProductInventory(
     String productId,
   ) async => {};
+
+  @override
+  Future<String?> deleteProduct(String productId) async {
+    deletedProductId = productId;
+    return 'image cleanup warning';
+  }
+
+  @override
+  Future<Map<String, dynamic>> getSellerFavoriteCounts() async => {};
 
   @override
   Future<void> addProduct(ProductEntity product, [File? imageFile]) async {}

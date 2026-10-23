@@ -72,6 +72,16 @@ class LogiMarketplaceApp extends StatelessWidget {
     final favoritesRepository = SupabaseFavoritesRepository(supabaseClient);
     final addProductUseCase = AddProductUseCase(productRepository);
     final updateProductUseCase = UpdateProductUseCase(productRepository);
+    final lightColorScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF2563EB),
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: const Color(0xFF2563EB),
+      onPrimary: Colors.white,
+      surface: Colors.white,
+      onSurface: const Color(0xFF0F172A),
+      onSurfaceVariant: const Color(0xFF64748B),
+    );
 
     return MultiRepositoryProvider(
       providers: [
@@ -127,15 +137,13 @@ class LogiMarketplaceApp extends StatelessWidget {
             themeMode: themeMode,
             theme: ThemeData(
               useMaterial3: true,
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.indigo,
-                brightness: Brightness.light,
-              ),
+              colorScheme: lightColorScheme,
+              scaffoldBackgroundColor: const Color(0xFFF8FAFC),
             ),
             darkTheme: ThemeData(
               useMaterial3: true,
               colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.indigo,
+                seedColor: const Color(0xFF2563EB),
                 brightness: Brightness.dark,
               ),
             ),

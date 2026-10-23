@@ -27,21 +27,16 @@ class SettingsPage extends StatelessWidget {
       body: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) => ListView(
           children: [
-            RadioListTile<ThemeMode>(
-              title: const Text('Light mode'),
-              value: ThemeMode.light,
-              groupValue: themeMode,
-              onChanged: (value) {
-                if (value != null) _selectTheme(context, value);
-              },
-            ),
-            RadioListTile<ThemeMode>(
-              title: const Text('Dark mode'),
-              value: ThemeMode.dark,
-              groupValue: themeMode,
-              onChanged: (value) {
-                if (value != null) _selectTheme(context, value);
-              },
+            SwitchListTile(
+              title: const Text('Light/Dark Mode'),
+              subtitle: Text(
+                themeMode == ThemeMode.dark ? 'Dark mode' : 'Light mode',
+              ),
+              value: themeMode == ThemeMode.dark,
+              onChanged: (enabled) => _selectTheme(
+                context,
+                enabled ? ThemeMode.dark : ThemeMode.light,
+              ),
             ),
           ],
         ),

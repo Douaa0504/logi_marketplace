@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../data/services/cart_service.dart';
 
 class CartPage extends StatefulWidget {
-  const CartPage({super.key});
+  final bool popOnCheckout;
+
+  const CartPage({super.key, this.popOnCheckout = true});
 
   @override
   State<CartPage> createState() => _CartPageState();
@@ -30,24 +32,25 @@ class _CartPageState extends State<CartPage> {
   }
 
   Future<void> _handleCheckout() async {
+    final colors = Theme.of(context).colorScheme;
     setState(() => _isProcessing = true);
     try {
       await _cartService.checkout();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Order placed successfully!'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('Order placed successfully!'),
+            backgroundColor: colors.primary,
           ),
         );
-        Navigator.pop(context);
+        if (widget.popOnCheckout) Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Checkout failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: colors.error,
           ),
         );
       }
@@ -59,15 +62,16 @@ class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
     final items = _cartService.items;
+    final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           'My Cart',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         elevation: 0,
         centerTitle: true,
       ),
@@ -79,12 +83,16 @@ class _CartPageState extends State<CartPage> {
                   Icon(
                     Icons.shopping_cart_outlined,
                     size: 80,
-                    color: Colors.grey.shade400,
+                    color: colors.onSurfaceVariant,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Your cart is empty',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: colors.onSurface,
+                    ),
                   ),
                 ],
               ),
@@ -110,7 +118,7 @@ class _CartPageState extends State<CartPage> {
                                 width: 60,
                                 height: 60,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey.shade100,
+                                  color: colors.surfaceContainerHighest,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: item.product.remoteImageUrl != null
@@ -123,16 +131,16 @@ class _CartPageState extends State<CartPage> {
                                           height: 60,
                                           errorBuilder:
                                               (context, error, stackTrace) {
-                                                return const Icon(
+                                                return Icon(
                                                   Icons.image,
-                                                  color: Colors.grey,
+                                                  color: colors.onSurfaceVariant,
                                                 );
                                               },
                                         ),
                                       )
-                                    : const Icon(
+                                    : Icon(
                                         Icons.image,
-                                        color: Colors.grey,
+                                        color: colors.onSurfaceVariant,
                                       ),
                               ),
                               const SizedBox(width: 12),
@@ -142,21 +150,27 @@ class _CartPageState extends State<CartPage> {
                                   children: [
                                     Text(
                                       item.product.title,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
+                                        color: colors.onSurface,
                                       ),
                                     ),
                                     if (item.product.inventoryMode ==
                                         'variants') ...[
                                       const SizedBox(height: 4),
-                                      Text(item.inventoryOption.label),
+                                      Text(
+                                        item.inventoryOption.label,
+                                        style: TextStyle(
+                                          color: colors.onSurfaceVariant,
+                                        ),
+                                      ),
                                     ],
                                     const SizedBox(height: 4),
                                     Text(
                                       '\$${item.product.price.toStringAsFixed(2)}',
-                                      style: const TextStyle(
-                                        color: Color(0xFF2563EB),
+                                      style: TextStyle(
+                                        color: colors.primary,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -179,8 +193,9 @@ class _CartPageState extends State<CartPage> {
                                   ),
                                   Text(
                                     '${item.quantity}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
+                                      color: colors.onSurface,
                                     ),
                                   ),
                                   IconButton(
@@ -204,13 +219,13 @@ class _CartPageState extends State<CartPage> {
                 ),
                 Container(
                   padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainer,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
+                        color: colors.shadow.withValues(alpha: 0.12),
                         blurRadius: 10,
-                        offset: Offset(0, -2),
+                        offset: const Offset(0, -2),
                       ),
                     ],
                   ),
@@ -219,19 +234,20 @@ class _CartPageState extends State<CartPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Total:',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
+                              color: colors.onSurface,
                             ),
                           ),
                           Text(
                             '\$${_cartService.totalAmount.toStringAsFixed(2)}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF2563EB),
+                              color: colors.primary,
                             ),
                           ),
                         ],
@@ -243,21 +259,22 @@ class _CartPageState extends State<CartPage> {
                         child: ElevatedButton(
                           onPressed: _isProcessing ? null : _handleCheckout,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2563EB),
+                            backgroundColor: colors.primary,
+                            foregroundColor: colors.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           child: _isProcessing
-                              ? const CircularProgressIndicator(
-                                  color: Colors.white,
+                              ?                                 CircularProgressIndicator(
+                                  color: colors.onPrimary,
                                 )
-                              : const Text(
+                                : Text(
                                   'Place Order',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                    color: colors.onPrimary,
                                   ),
                                 ),
                         ),

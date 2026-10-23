@@ -7,6 +7,10 @@ class OrderEntity {
   final double totalPrice;
   final String status;
   final DateTime createdAt;
+  final String productTitle;
+  final String? productImageUrl;
+  final String? variantColor;
+  final String? variantSize;
 
   OrderEntity({
     required this.id,
@@ -17,5 +21,9 @@ class OrderEntity {
     required this.totalPrice,
     required this.status,
     required this.createdAt,
+    required this.productTitle,
+    this.productImageUrl,
+    this.variantColor,
+    this.variantSize,
   });
 }

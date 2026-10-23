@@ -12,6 +12,10 @@ class SignUpUseCase {
     required String fullName,
     required String role,
   }) async {
+    if (role != 'buyer' && role != 'seller') {
+      throw ArgumentError.value(role, 'role', 'Role must be buyer or seller.');
+    }
+
     return await repository.signUp(
       email: email,
       password: password,

@@ -13,15 +13,17 @@ class ProductGridView extends StatelessWidget {
     return BlocBuilder<BuyerHomeCubit, BuyerHomeState>(
       builder: (context, state) {
         if (state is BuyerHomeLoading) {
-          return const Center(
+          return Center(
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 40),
-              child: CircularProgressIndicator(color: Color(0xFF2563EB)),
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           );
         } else if (state is BuyerHomeLoaded) {
           if (state.products.isEmpty) {
-            return _buildEmptyState();
+            return _buildEmptyState(context);
           }
 
           return GridView.builder(
@@ -74,7 +76,8 @@ class ProductGridView extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 60),
@@ -84,29 +87,32 @@ class ProductGridView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
+              color: colors.surfaceContainerHighest,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.inventory_2_outlined,
               size: 48,
-              color: Color(0xFF64748B),
+              color: colors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'No products found',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0F172A),
+              color: colors.onSurface,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Try switching categories or check back later.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+            style: TextStyle(
+              color: colors.onSurfaceVariant,
+              fontSize: 14,
+            ),
           ),
         ],
       ),

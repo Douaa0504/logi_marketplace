@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../domain/repositories/product_repository.dart';
-import '../../favorites/favorites_cubit.dart';
 import '../cubit/buyer_home_cubit.dart';
 import 'widgets/home_app_bar.dart';
 import 'widgets/search_filter_bar.dart';
@@ -16,20 +15,6 @@ class BuyerHomePage extends StatefulWidget {
 }
 
 class _BuyerHomePageState extends State<BuyerHomePage> {
-  bool _favoritesLoadScheduled = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_favoritesLoadScheduled) return;
-    _favoritesLoadScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<FavoritesCubit>().loadFavorites();
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(

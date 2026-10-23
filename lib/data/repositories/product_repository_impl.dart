@@ -60,4 +60,14 @@ class ProductRepositoryImpl implements ProductRepository {
   ) {
     return remoteDataSource.getSellerProductInventory(productId);
   }
+
+  @override
+  Future<String?> deleteProduct(String productId) {
+    return remoteDataSource.deleteProduct(productId);
+  }
+
+  @override
+  Future<Map<String, dynamic>> getSellerFavoriteCounts() {
+    return remoteDataSource.getSellerFavoriteCounts();
+  }
 }

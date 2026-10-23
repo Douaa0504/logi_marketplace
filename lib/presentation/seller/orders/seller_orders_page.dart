@@ -72,29 +72,30 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
     }
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(String status, ColorScheme colors) {
     switch (status.toLowerCase()) {
       case 'accepted':
-        return Colors.blue;
+        return colors.primary;
       case 'completed':
-        return Colors.green;
+        return colors.tertiary;
       case 'cancelled':
-        return Colors.red;
+        return colors.error;
       default:
-        return Colors.orange;
+        return colors.secondary;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: colors.surface,
       appBar: AppBar(
         title: const Text(
           'Store Orders',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -113,35 +114,38 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colors.surfaceContainerHighest,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
+                          color: colors.shadow.withValues(alpha: 0.04),
                           blurRadius: 10,
                         ),
                       ],
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.receipt_long_rounded,
                       size: 64,
-                      color: Color(0xFF2563EB),
+                      color: colors.primary,
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'No orders yet',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A),
+                      color: colors.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'When buyers purchase your products,\ntheir orders will appear here.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Color(0xFF64748B), height: 1.5),
+                    style: TextStyle(
+                      color: colors.onSurfaceVariant,
+                      height: 1.5,
+                    ),
                   ),
                 ],
               ),
@@ -155,6 +159,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                   final order = _orders[index];
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
+                    color: colors.surface,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -168,9 +173,9 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                             children: [
                               Text(
                                 'Order #${order.id.substring(0, 8)}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                style: TextStyle(
+                                  color: colors.onSurfaceVariant,
+                                  fontSize: 12,
                                 ),
                               ),
                               Container(
@@ -181,13 +186,17 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                                 decoration: BoxDecoration(
                                   color: _getStatusColor(
                                     order.status,
-                                  ).withValues(alpha: 0.1),
+                                    colors,
+                                  ).withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
                                   order.status.toUpperCase(),
                                   style: TextStyle(
-                                    color: _getStatusColor(order.status),
+                                    color: _getStatusColor(
+                                      order.status,
+                                      colors,
+                                    ),
                                     fontWeight: FontWeight.bold,
                                     fontSize: 12,
                                   ),
@@ -195,13 +204,58 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 12),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _OrderProductImage(url: order.productImageUrl),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      order.productTitle,
+                                      style: TextStyle(
+                                        color: colors.onSurface,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Quantity: ${order.quantity}',
+                                      style: TextStyle(
+                                        color: colors.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    if (order.variantColor != null &&
+                                        order.variantColor!.isNotEmpty)
+                                      Text(
+                                        'Color: ${order.variantColor}',
+                                        style: TextStyle(
+                                          color: colors.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    if (order.variantSize != null &&
+                                        order.variantSize!.isNotEmpty)
+                                      Text(
+                                        'Size: ${order.variantSize}',
+                                        style: TextStyle(
+                                          color: colors.onSurfaceVariant,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 8),
-                          Text('Quantity: ${order.quantity}'),
                           Text(
                             'Total: \$${order.totalPrice.toStringAsFixed(2)}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF2563EB),
+                              color: colors.primary,
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -212,9 +266,9 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                                 TextButton(
                                   onPressed: () =>
                                       _updateStatus(order.id, 'cancelled'),
-                                  child: const Text(
+                                  child: Text(
                                     'Cancel',
-                                    style: TextStyle(color: Colors.red),
+                                    style: TextStyle(color: colors.error),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -222,24 +276,20 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                                   onPressed: () =>
                                       _updateStatus(order.id, 'accepted'),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF2563EB),
+                                    backgroundColor: colors.primary,
+                                    foregroundColor: colors.onPrimary,
                                   ),
-                                  child: const Text(
-                                    'Accept',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                                  child: const Text('Accept'),
                                 ),
                               ] else if (order.status == 'accepted') ...[
                                 ElevatedButton(
                                   onPressed: () =>
                                       _updateStatus(order.id, 'completed'),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
+                                    backgroundColor: colors.tertiary,
+                                    foregroundColor: colors.onTertiary,
                                   ),
-                                  child: const Text(
-                                    'Complete',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                                  child: const Text('Complete'),
                                 ),
                               ],
                             ],
@@ -250,6 +300,42 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                   );
                 },
               ),
+            ),
+    );
+  }
+}
+
+class _OrderProductImage extends StatelessWidget {
+  final String? url;
+
+  const _OrderProductImage({required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final uri = url == null ? null : Uri.tryParse(url!);
+    final validUrl =
+        uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: validUrl
+          ? Image.network(
+              url!,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => Icon(
+                Icons.image_not_supported_outlined,
+                color: colors.onSurfaceVariant,
+              ),
+            )
+          : Icon(
+              Icons.image_not_supported_outlined,
+              color: colors.onSurfaceVariant,
             ),
     );
   }

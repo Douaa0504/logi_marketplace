@@ -23,13 +23,14 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: colors.shadow.withValues(alpha: 0.08),
               blurRadius: 10,
             ),
           ],
@@ -37,11 +38,11 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,
           onTap: (index) => setState(() => _selectedIndex = index),
-          selectedItemColor: const Color(0xFF2563EB),
-          unselectedItemColor: const Color(0xFF64748B),
+          selectedItemColor: colors.primary,
+          unselectedItemColor: colors.onSurfaceVariant,
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
+          backgroundColor: colors.surface,
           elevation: 0,
           items: const [
             BottomNavigationBarItem(

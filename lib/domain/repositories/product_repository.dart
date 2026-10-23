@@ -6,5 +6,7 @@ abstract class ProductRepository {
   Future<List<ProductEntity>> getProducts();
   Future<void> addProduct(ProductEntity product, [File? imageFile]);
   Future<void> updateProduct(ProductEntity product, [File? imageFile]);
+  Future<String?> deleteProduct(String productId);
   Future<Map<String, dynamic>> getSellerProductInventory(String productId);
+  Future<Map<String, dynamic>> getSellerFavoriteCounts();
 }

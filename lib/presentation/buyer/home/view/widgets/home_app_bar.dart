@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logi_marketplace/core/navigation/app_router.dart';
 import '../../../../auth/cubit/auth_cubit.dart';
-import '../../../../auth/pages/cart_page.dart';
-import '../../../favorites/favorites_page.dart';
-import '../../../../shared/settings_page.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   const HomeAppBar({super.key});
@@ -39,30 +36,6 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
-        IconButton(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const FavoritesPage()),
-          ),
-          icon: Icon(Icons.favorite_border, color: colors.onSurface),
-          tooltip: 'Favorites',
-        ),
-        IconButton(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const SettingsPage()),
-          ),
-          icon: Icon(Icons.settings_outlined, color: colors.onSurface),
-          tooltip: 'Settings',
-        ),
-        IconButton(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CartPage()),
-          ),
-          icon: Icon(Icons.shopping_cart_outlined, color: colors.onSurface),
-          tooltip: 'Cart',
-        ),
         IconButton(
           onPressed: () => _signOut(context),
           icon: Icon(Icons.logout_rounded, color: colors.onSurface),

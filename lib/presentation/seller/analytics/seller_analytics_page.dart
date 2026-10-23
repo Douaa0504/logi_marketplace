@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../auth/cubit/product_cubit.dart';
 
 class SellerAnalyticsPage extends StatefulWidget {
   const SellerAnalyticsPage({super.key});
@@ -13,6 +15,7 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
   double _totalRevenue = 0.0;
   int _totalOrders = 0;
   int _totalProducts = 0;
+  int _totalFavorites = 0;
   String? _errorMessage;
 
   @override
@@ -45,6 +48,11 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
           .eq('seller_id', currentUserId);
 
       final productsCount = (productsResponse as List).length;
+      final favoriteSummary = await context
+          .read<ProductCubit>()
+          .getSellerFavoriteCounts();
+      final totalFavorites =
+          (favoriteSummary['total'] as num?)?.toInt() ?? 0;
 
       final ordersResponse = await client
           .from('orders')
@@ -65,6 +73,7 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
 
       setState(() {
         _totalProducts = productsCount;
+        _totalFavorites = totalFavorites;
         _totalOrders = ordersCount;
         _totalRevenue = calculatedRevenue;
         _isLoading = false;
@@ -79,14 +88,15 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           'Analytics',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -106,24 +116,35 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
                 padding: const EdgeInsets.all(16.0),
                 children: [
                   _buildMetricCard(
+                    context,
                     title: 'Total Revenue',
                     value: '\$${_totalRevenue.toStringAsFixed(2)}',
                     icon: Icons.attach_money,
-                    color: Colors.green,
+                    color: colors.tertiary,
                   ),
                   const SizedBox(height: 12),
                   _buildMetricCard(
+                    context,
                     title: 'Total Orders',
                     value: '$_totalOrders',
                     icon: Icons.shopping_bag_outlined,
-                    color: Colors.blue,
+                    color: colors.primary,
                   ),
                   const SizedBox(height: 12),
                   _buildMetricCard(
+                    context,
                     title: 'Active Products',
                     value: '$_totalProducts',
                     icon: Icons.inventory_2_outlined,
-                    color: Colors.orange,
+                    color: colors.tertiary,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildMetricCard(
+                    context,
+                    title: 'Product Favorites',
+                    value: '$_totalFavorites',
+                    icon: Icons.favorite_border,
+                    color: colors.error,
                   ),
                 ],
               ),
@@ -131,17 +152,20 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
     );
   }
 
-  Widget _buildMetricCard({
+  Widget _buildMetricCard(
+    BuildContext context, {
     required String title,
     required String value,
     required IconData icon,
     required Color color,
   }) {
+    final colors = Theme.of(context).colorScheme;
     return Card(
+      color: colors.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: colors.outlineVariant),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -161,18 +185,18 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF64748B),
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A),
+                    color: colors.onSurface,
                   ),
                 ),
               ],

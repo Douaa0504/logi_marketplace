@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/storage/app_storage.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../presentation/auth/pages/auth_page.dart';
-import '../../presentation/buyer/home/view/buyer_home_page.dart';
+import '../../presentation/buyer/navigation/buyer_navigation_page.dart';
 import '../../presentation/seller/dashboard/seller_dashboard_page.dart';
 
 class AppRouter {
@@ -24,7 +24,7 @@ class AppRouter {
 
     final Widget destination = role == 'seller'
         ? const SellerDashboardPage()
-        : const BuyerHomePage();
+        : const BuyerNavigationPage();
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => destination),

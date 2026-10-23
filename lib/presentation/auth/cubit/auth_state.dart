@@ -2,11 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class AuthState {}
 
-// Initial state with the default role selection
-class AuthInitial extends AuthState {
-  final String selectedRole; // 'buyer' or 'seller'
-  AuthInitial({this.selectedRole = 'buyer'});
-}
+class AuthInitial extends AuthState {}
 
 // Loading state for API calls
 class AuthLoading extends AuthState {}

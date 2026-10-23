@@ -84,7 +84,9 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = _selectedRole == 'seller' ? sellerDark : primaryBlue;
+    final activeColor = _isSignUp && _selectedRole == 'seller'
+        ? sellerDark
+        : primaryBlue;
 
     return Scaffold(
       backgroundColor: lightBackground,
@@ -118,10 +120,6 @@ class _AuthPageState extends State<AuthPage> {
             }
           },
           builder: (context, state) {
-            if (state is AuthInitial) {
-              _selectedRole = state.selectedRole;
-            }
-
             return Center(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -144,7 +142,7 @@ class _AuthPageState extends State<AuthPage> {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          _selectedRole == 'seller'
+                          _selectedRole == 'seller' && _isSignUp
                               ? Icons.storefront_rounded
                               : Icons.shopping_bag_rounded,
                           size: 42,
@@ -174,20 +172,22 @@ class _AuthPageState extends State<AuthPage> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE2E8F0),
-                          borderRadius: BorderRadius.circular(20),
+                      if (_isSignUp) ...[
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE2E8F0),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            children: [
+                              _buildRoleTab('Buyer', 'buyer', activeColor),
+                              _buildRoleTab('Seller', 'seller', activeColor),
+                            ],
+                          ),
                         ),
-                        child: Row(
-                          children: [
-                            _buildRoleTab('Buyer', 'buyer', activeColor),
-                            _buildRoleTab('Seller', 'seller', activeColor),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 32),
+                        const SizedBox(height: 32),
+                      ],
                       if (_isSignUp) ...[
                         CustomTextField(
                           controller: _nameController,
@@ -282,10 +282,7 @@ class _AuthPageState extends State<AuthPage> {
     final isSelected = _selectedRole == role;
     return Expanded(
       child: GestureDetector(
-        onTap: () {
-          setState(() => _selectedRole = role);
-          context.read<AuthCubit>().toggleRole(role);
-        },
+        onTap: () => setState(() => _selectedRole = role),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.symmetric(vertical: 12),
