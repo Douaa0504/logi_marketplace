@@ -7,6 +7,7 @@ import 'widgets/search_filter_bar.dart';
 import 'widgets/category_selector.dart';
 import 'widgets/product_grid_view.dart';
 
+/// Assemble les contrôles de recherche, catégories et résultats du catalogue Buyer.
 class BuyerHomePage extends StatefulWidget {
   const BuyerHomePage({super.key});
 
@@ -17,6 +18,7 @@ class BuyerHomePage extends StatefulWidget {
 class _BuyerHomePageState extends State<BuyerHomePage> {
   @override
   Widget build(BuildContext context) {
+    // Le Cubit est lié à cette page et charge les produits à son ouverture.
     return BlocProvider(
       create: (context) =>
           BuyerHomeCubit(context.read<ProductRepository>())..loadHomeData(),

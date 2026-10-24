@@ -40,6 +40,7 @@ class _PublicShopPageState extends State<PublicShopPage> {
     });
 
     try {
+      // Profil public et produits sont chargés séparément selon leurs accès dédiés.
       final profile = await context
           .read<ProfileRepository>()
           .getSellerProfile(widget.sellerId);

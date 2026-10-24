@@ -38,6 +38,7 @@ import 'package:logi_marketplace/presentation/buyer/favorites/favorites_cubit.da
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Les services locaux et Supabase doivent être prêts avant le premier Widget.
   await dotenv.load(fileName: ".env");
 
   await Supabase.initialize(
@@ -57,6 +58,7 @@ class LogiMarketplaceApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final supabaseClient = Supabase.instance.client;
 
+    // Construit les implémentations concrètes puis les expose aux couches UI.
     // Auth Dependencies
     final authRemoteDataSource = AuthRemoteDataSourceImpl(
       supabaseClient: Supabase.instance.client,

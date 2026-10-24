@@ -5,6 +5,7 @@ import '../../shared/product_card.dart';
 import '../product_details/view/product_details_page.dart';
 import 'favorites_cubit.dart';
 
+/// Affiche les produits favoris et leurs états de chargement, erreur ou liste vide.
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
 

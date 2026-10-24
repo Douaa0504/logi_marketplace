@@ -10,6 +10,7 @@ import '../../../shared/primary_button.dart';
 import '../../../shared/favorite_button.dart';
 import '../../../shared/public_shop_page.dart';
 
+/// Présente un produit, ses options d'inventaire, ses avis et l'action d'achat.
 class ProductDetailsPage extends StatefulWidget {
   final ProductEntity product;
 
@@ -58,6 +59,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   }
 
   Future<void> _loadReviews() async {
+    // Le repository renvoie tous les avis visibles pour ce produit, pas seulement le nôtre.
     final repo = context.read<ReviewRepository>();
     setState(() => _isLoadingReviews = true);
     try {
@@ -95,6 +97,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       return;
     }
 
+    // La contrainte d'un avis par acheteur et produit est aussi appliquée par la base.
     if (_reviews.any((review) => review.isMine)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('You have already reviewed this product.')),
@@ -127,6 +130,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   }
 
   Future<void> _deleteReview(ReviewEntity review) async {
+    // L'action n'est proposée que pour son propre avis ; la RLS vérifie aussi le propriétaire.
     if (!review.isMine || _isDeletingReview) return;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -151,6 +155,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     try {
       await context.read<ReviewRepository>().deleteReview(review.id);
       if (!mounted) return;
+      // Recharge la liste pour recalculer la moyenne et le nombre d'avis.
       setState(() {
         _reviews.removeWhere((item) => item.id == review.id);
       });

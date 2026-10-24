@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/review_entity.dart';
 import '../../domain/repositories/review_repository.dart';
 
+/// Accède aux avis via la vue publique et applique les validations du client.
 class SupabaseReviewRepository implements ReviewRepository {
   final SupabaseClient supabaseClient;
 
@@ -10,6 +11,7 @@ class SupabaseReviewRepository implements ReviewRepository {
 
   @override
   Future<List<ReviewEntity>> getProductReviews(String productId) async {
+    // La vue applique les règles de visibilité ; la liste reste limitée au produit demandé.
     final response = await supabaseClient
         .from('product_reviews_public')
         .select()
@@ -33,6 +35,7 @@ class SupabaseReviewRepository implements ReviewRepository {
       throw StateError('Only authenticated buyers can submit reviews.');
     }
 
+    // La validation côté client complète les contraintes appliquées par la base.
     if (rating < 1 || rating > 5) {
       throw StateError('Rating must be between 1 and 5.');
     }
@@ -99,6 +102,7 @@ class SupabaseReviewRepository implements ReviewRepository {
         .eq('id', reviewId)
         .eq('is_mine', true)
         .maybeSingle();
+    // Le contrôle rend l'erreur explicite ; la policy RLS reste l'autorité finale.
     if (ownReview == null) {
       throw StateError('You can only delete your own review.');
     }

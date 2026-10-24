@@ -1,6 +1,7 @@
 import '../../domain/entities/product_entity.dart';
 import '../../domain/entities/product_inventory_option_entity.dart';
 
+/// Adapte les colonnes Supabase au modèle produit du domaine.
 class ProductModel extends ProductEntity {
   ProductModel({
     required super.id,

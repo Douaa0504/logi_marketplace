@@ -12,6 +12,7 @@ class SignUpUseCase {
     required String fullName,
     required String role,
   }) async {
+    // Le rôle est limité aux deux parcours pris en charge par l'application.
     if (role != 'buyer' && role != 'seller') {
       throw ArgumentError.value(role, 'role', 'Role must be buyer or seller.');
     }

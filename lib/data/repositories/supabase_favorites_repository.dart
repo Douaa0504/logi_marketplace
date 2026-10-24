@@ -1,12 +1,14 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/repositories/favorites_repository.dart';
 
+/// Persiste les favoris en les associant à l'utilisateur Supabase connecté.
 class SupabaseFavoritesRepository implements FavoritesRepository {
   final SupabaseClient supabaseClient;
 
   SupabaseFavoritesRepository(this.supabaseClient);
 
   String get _userId {
+    // Les opérations de favoris sont exécutées pour la session courante.
     final user = supabaseClient.auth.currentUser;
     if (user == null) {
       throw StateError('Sign in to manage favorites.');

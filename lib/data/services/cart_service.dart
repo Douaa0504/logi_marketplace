@@ -8,6 +8,7 @@ import '../../domain/entities/product_entity.dart';
 import '../../domain/entities/product_inventory_option_entity.dart';
 
 class CartService extends ChangeNotifier {
+  // Le panier partagé conserve son état lors du passage entre les onglets.
   static final CartService _instance = CartService._internal();
   factory CartService() => _instance;
   CartService._internal();
@@ -125,6 +126,7 @@ class CartService extends ChangeNotifier {
       };
     }).toList();
     final requestPayload = jsonEncode(orderItems);
+    // Un nouvel identifiant est créé seulement si le contenu du panier a changé.
     if (_pendingCheckoutPayload != requestPayload) {
       _pendingCheckoutRequestId = _newRequestId();
       _pendingCheckoutPayload = requestPayload;

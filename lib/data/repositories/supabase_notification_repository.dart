@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/seller_notification_entity.dart';
 import '../../domain/repositories/notification_repository.dart';
 
+/// Lit et met à jour les notifications du vendeur connecté.
 class SupabaseNotificationRepository implements NotificationRepository {
   final SupabaseClient supabaseClient;
 
@@ -18,6 +19,7 @@ class SupabaseNotificationRepository implements NotificationRepository {
     final rows = await supabaseClient
         .from('seller_notifications')
         .select()
+        // Ce filtre explicite complète les contrôles d'accès définis par RLS.
         .eq('seller_id', user.id)
         .order('created_at', ascending: false);
 

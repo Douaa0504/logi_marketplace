@@ -99,6 +99,7 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
   }
 
   Future<void> _editProfile() async {
+    // Le profil est relu après l'édition pour refléter les valeurs enregistrées.
     final saved = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
@@ -109,6 +110,7 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
   }
 
   void _previewShop() {
+    // L'aperçu réutilise la même vitrine publique que celle visible par les acheteurs.
     final sellerId = _profile?.id;
     if (sellerId == null || sellerId.isEmpty) return;
     Navigator.push(

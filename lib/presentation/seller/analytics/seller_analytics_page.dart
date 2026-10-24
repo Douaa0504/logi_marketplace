@@ -64,6 +64,7 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
       final ordersCount = ordersList.length;
 
       double calculatedRevenue = 0.0;
+      // Seules les commandes acceptées ou terminées comptent dans le chiffre d'affaires.
       for (var order in ordersList) {
         final status = order['status'] as String?;
 

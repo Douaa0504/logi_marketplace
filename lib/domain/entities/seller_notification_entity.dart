@@ -1,3 +1,4 @@
+/// Représente une notification de la boutique du vendeur concerné.
 class SellerNotificationEntity {
   final String id;
   final String sellerId;

@@ -5,6 +5,7 @@ import '../../../domain/usecases/sign_in_usecase.dart';
 import '../../../domain/usecases/sign_up_usecase.dart';
 import 'auth_state.dart';
 
+/// Coordonne les actions de connexion, inscription et fermeture de session.
 class AuthCubit extends Cubit<AuthState> {
   final SignInUseCase signInUseCase;
   final SignUpUseCase signUpUseCase;
@@ -33,6 +34,7 @@ class AuthCubit extends Cubit<AuthState> {
 
       final user = response.user;
       if (user != null) {
+        // Sans session immédiate, le compte doit d'abord être confirmé par e-mail.
         if (response.session == null) {
           emit(AuthConfirmationRequired(email: email));
         } else {
@@ -66,6 +68,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> signOut() async {
     await authRepository.signOut();
+    // Efface le rôle mis en cache après la fermeture de la session Supabase.
     await AppStorage().clearAuthData();
     emit(AuthInitial());
   }

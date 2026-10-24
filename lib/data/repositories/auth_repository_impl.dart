@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 
+/// Relie les cas d'utilisation d'authentification au datasource Supabase.
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
 
@@ -55,6 +56,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     final role = profile['role']?.toString().trim().toLowerCase();
+    // Seuls les rôles utilisés par les parcours de l'application sont acceptés.
     if (role == null || (role != 'buyer' && role != 'seller')) {
       throw const AuthProfileException(
         'Your account profile does not have a valid buyer or seller role.',

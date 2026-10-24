@@ -11,6 +11,7 @@ class ThemeCubit extends Cubit<ThemeMode> {
        super(initialThemeMode);
 
   Future<void> setThemeMode(ThemeMode themeMode) async {
+    // Persiste la préférence avant d'émettre le nouvel état.
     await _saveThemeMode(themeMode);
     emit(themeMode);
   }

@@ -9,6 +9,7 @@ class SettingsPage extends StatelessWidget {
     BuildContext context,
     ThemeMode themeMode,
   ) async {
+    // La préférence est persistée par le ThemeCubit avant de mettre à jour l'UI.
     try {
       await context.read<ThemeCubit>().setThemeMode(themeMode);
     } catch (error) {

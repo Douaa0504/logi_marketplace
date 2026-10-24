@@ -19,6 +19,7 @@ abstract class ProductRemoteDataSource {
   Future<Map<String, dynamic>> getSellerFavoriteCounts();
 }
 
+/// Gère les lectures et écritures Supabase liées aux produits et à leur inventaire.
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   final SupabaseClient supabaseClient;
 
@@ -171,6 +172,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
         .eq('id', productId)
         .eq('seller_id', userId)
         .single();
+    // Les images référencées par une commande ou un autre produit sont conservées.
     final orderReferences = await supabaseClient
         .from('orders')
         .select('id')
@@ -298,6 +300,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   ) async {
     if (products.isEmpty) return products;
 
+    // Charge en une requête les variantes de tous les produits affichés.
     final productIds = products.map((product) => product.id).toList();
     final response = await supabaseClient
         .from('product_inventory_options')

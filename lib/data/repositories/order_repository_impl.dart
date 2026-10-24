@@ -7,6 +7,7 @@ class OrderRepositoryImpl {
   OrderRepositoryImpl({required this.supabaseClient});
 
   Future<List<OrderEntity>> getSellerOrders(String sellerId) async {
+    // Les snapshots préservent les libellés de commande si un produit a disparu.
     final response = await supabaseClient
         .from('orders')
         .select()

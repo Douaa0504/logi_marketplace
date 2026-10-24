@@ -1,3 +1,4 @@
+/// Données publiques d'un avis et indicateur permettant d'identifier son auteur connecté.
 class ReviewEntity {
   final String id;
   final String productId;

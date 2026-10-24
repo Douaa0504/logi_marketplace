@@ -13,6 +13,7 @@ void main() {
     test(
       'updates editable fields and preserves existing product identity',
       () async {
+        // La modification doit changer les champs éditables sans remplacer l'identité.
         final repository = _FakeProductRepository();
         final cubit = ProductCubit(
           productRepository: repository,

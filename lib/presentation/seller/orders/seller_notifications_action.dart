@@ -28,6 +28,7 @@ class _SellerNotificationsActionState extends State<SellerNotificationsAction> {
       builder: (_) => const _SellerNotificationsSheet(),
     );
     if (!mounted) return;
+    // Actualise le badge à la fermeture, après les éventuels marquages comme lus.
     setState(() {
       _unreadCount = context.read<NotificationRepository>().getUnreadCount();
     });

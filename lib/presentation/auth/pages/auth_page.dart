@@ -13,6 +13,7 @@ import 'package:logi_marketplace/presentation/auth/cubit/auth_state.dart';
 import 'package:logi_marketplace/presentation/shared/custom_text_field.dart';
 import 'package:logi_marketplace/presentation/shared/primary_button.dart';
 
+/// Gère les formulaires d'inscription et de connexion Buyer/Seller.
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
 

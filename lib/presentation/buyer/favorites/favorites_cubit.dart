@@ -40,6 +40,7 @@ class FavoritesState {
   }
 }
 
+/// Synchronise les IDs favoris enregistrés avec les produits affichés.
 class FavoritesCubit extends Cubit<FavoritesState> {
   final FavoritesRepository _favoritesRepository;
   final ProductRepository _productRepository;
@@ -51,6 +52,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     emit(state.copyWith(isLoading: true, clearError: true));
     try {
       final productIds = await _favoritesRepository.getFavoriteProductIds();
+      // Les identifiants favoris sont résolus en produits pour alimenter la liste UI.
       final allProducts = await _productRepository.getProducts();
       final products = allProducts
           .where((product) => productIds.contains(product.id))
@@ -79,6 +81,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     }
     if (state.pendingProductIds.contains(productId)) return;
 
+    // Empêche les doubles mutations pendant qu'une requête pour ce produit est en cours.
     final pending = Set<String>.from(state.pendingProductIds)..add(productId);
     emit(state.copyWith(pendingProductIds: Set.unmodifiable(pending)));
     try {

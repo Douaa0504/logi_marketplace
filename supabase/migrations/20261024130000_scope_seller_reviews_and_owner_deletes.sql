@@ -1,5 +1,6 @@
 BEGIN;
 
+-- Les Buyers voient les avis publics ; un Seller ne voit que ceux de ses produits.
 CREATE OR REPLACE VIEW public.product_reviews_public
   WITH (security_barrier = true) AS
 SELECT
@@ -50,6 +51,7 @@ CREATE POLICY product_reviews_update_buyer
     )
   );
 
+-- La suppression reste réservée au Buyer propriétaire, même avec un ID connu.
 DROP POLICY IF EXISTS product_reviews_delete_buyer
   ON public.product_reviews;
 CREATE POLICY product_reviews_delete_buyer

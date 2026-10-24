@@ -5,6 +5,7 @@ import '../../domain/repositories/product_repository.dart';
 import '../datasources/product_remote_datasource.dart';
 import '../models/product_model.dart';
 
+/// Traduit les opérations produit du domaine vers le datasource distant.
 class ProductRepositoryImpl implements ProductRepository {
   final ProductRemoteDataSource remoteDataSource;
 
@@ -17,6 +18,7 @@ class ProductRepositoryImpl implements ProductRepository {
 
   @override
   Future<void> addProduct(ProductEntity product, [File? imageFile]) async {
+    // Le Model adapte l'Entity du domaine au format attendu par le datasource.
     final model = ProductModel(
       id: product.id,
       sellerId: product.sellerId,

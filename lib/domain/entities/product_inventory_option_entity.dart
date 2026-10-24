@@ -1,3 +1,4 @@
+/// Variante de stock sélectionnable pour un produit.
 class ProductInventoryOptionEntity {
   final String id;
   final String? color;

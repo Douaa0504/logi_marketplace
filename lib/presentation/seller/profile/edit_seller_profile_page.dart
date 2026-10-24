@@ -77,6 +77,7 @@ class _EditSellerProfilePageState extends State<EditSellerProfilePage> {
   }
 
   Future<void> _saveProfile() async {
+    // Le logo est téléversé avant d'enregistrer son URL avec les autres champs.
     if (!_formKey.currentState!.validate()) return;
     final repo = context.read<ProfileRepository>();
     setState(() => _isSaving = true);
@@ -113,6 +114,7 @@ class _EditSellerProfilePageState extends State<EditSellerProfilePage> {
   }
 
   Future<bool> _confirmExit() async {
+    // Évite de perdre les modifications saisies si l'utilisateur ferme l'éditeur.
     if (_isSaving) return false;
     if (!_hasChanges) return true;
     final result = await showDialog<bool>(

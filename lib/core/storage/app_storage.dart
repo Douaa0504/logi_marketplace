@@ -1,6 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
 class AppStorage {
+  // Une instance partagée évite d'ouvrir plusieurs fois les mêmes boxes Hive.
   static final AppStorage _instance = AppStorage._internal();
   factory AppStorage() => _instance;
   AppStorage._internal();

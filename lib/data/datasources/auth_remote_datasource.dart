@@ -60,6 +60,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>?> getUserProfile(String uid) async {
+    // Le profil est recherché par l'identifiant Auth, jamais par l'adresse e-mail.
     final response = await supabaseClient
         .from('profiles')
         .select()

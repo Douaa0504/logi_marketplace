@@ -8,6 +8,7 @@ import '../../../domain/entities/product_inventory_option_entity.dart';
 import '../cubit/product_cubit.dart';
 import '../cubit/product_state.dart';
 
+/// Formulaire vendeur commun à la création et à la modification d'un produit.
 class AddProductPage extends StatefulWidget {
   final ProductEntity? product;
 

@@ -3,6 +3,7 @@ import '../../domain/entities/product_entity.dart';
 import '../../data/services/cart_service.dart';
 import 'favorite_button.dart';
 
+/// Carte réutilisable du catalogue, des favoris et de la vitrine publique.
 class ProductCard extends StatelessWidget {
   final ProductEntity product;
   final VoidCallback onTap;

@@ -27,6 +27,7 @@ class ProfileRemoteDataSource {
   }
 
   Future<Map<String, dynamic>> getProfileById(String sellerId) async {
+    // La vue publique ne retourne que les champs destinés à la vitrine.
     final profile = await supabaseClient
         .from('public_seller_shops')
         .select('id, shop_name, shop_description, shop_logo_url')
@@ -92,6 +93,7 @@ class ProfileRemoteDataSource {
     }
 
     final extension = file.path.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
+    // Le chemin inclut l'ID authentifié et un nom unique pour éviter l'écrasement.
     final path =
         'shop-logos/${user.id}/${DateTime.now().microsecondsSinceEpoch}.$extension';
     final uploadBytes = await file.readAsBytes();

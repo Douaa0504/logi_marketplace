@@ -1,3 +1,4 @@
+/// Profil boutique utilisé par l'espace vendeur et la vitrine publique.
 class ShopProfileEntity {
   final String id;
   final String? fullName;
@@ -33,6 +34,7 @@ class ShopProfileEntity {
   }
 
   String get publicShopName {
+    // Une valeur absente en base est remplacée par un nom de vitrine neutre.
     final value = (shopName ?? '').trim();
     return value.isEmpty ? 'Seller Shop' : value;
   }

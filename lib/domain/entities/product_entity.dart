@@ -1,5 +1,6 @@
 import 'product_inventory_option_entity.dart';
 
+/// Représente un produit indépendamment de son stockage Supabase.
 class ProductEntity {
   final String id;
   final String sellerId;

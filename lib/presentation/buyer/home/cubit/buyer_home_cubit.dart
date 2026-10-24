@@ -38,6 +38,7 @@ class BuyerHomeCubit extends Cubit<BuyerHomeState> {
   }
 
   void _emitFilteredProducts() {
+    // La recherche et la catégorie s'appliquent localement aux produits déjà chargés.
     final normalizedQuery = _searchQuery.trim().toLowerCase();
     final filteredProducts = _allProducts.where((product) {
       final matchesCategory =

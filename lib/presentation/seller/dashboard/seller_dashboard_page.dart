@@ -12,6 +12,7 @@ class SellerDashboardPage extends StatefulWidget {
 }
 
 class _SellerDashboardPageState extends State<SellerDashboardPage> {
+  // IndexedStack conserve l'état de chaque onglet lors de la navigation.
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [

@@ -34,6 +34,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
     });
 
     try {
+      // Le repository reçoit l'ID de session ; l'accès est également contrôlé côté backend.
       final currentUserId = Supabase.instance.client.auth.currentUser?.id;
       if (currentUserId != null) {
         final orders = await _orderRepository.getSellerOrders(currentUserId);

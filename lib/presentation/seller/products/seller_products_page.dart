@@ -8,6 +8,7 @@ import '../../auth/cubit/product_cubit.dart';
 import '../../auth/cubit/product_state.dart';
 import '../../auth/pages/add_product_page.dart';
 
+/// Liste les produits du vendeur et donne accès à leur édition et à leurs avis.
 class SellerProductsPage extends StatefulWidget {
   const SellerProductsPage({super.key});
 
@@ -270,6 +271,7 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
   }
 }
 
+// Charge les avis à l'ouverture de la section de chaque produit vendeur.
 class _SellerProductReviews extends StatefulWidget {
   final String productId;
 

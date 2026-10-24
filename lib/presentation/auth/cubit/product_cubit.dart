@@ -7,6 +7,7 @@ import '../../../domain/usecases/add_product_usecase.dart';
 import '../../../domain/usecases/update_product_usecase.dart';
 import 'product_state.dart';
 
+/// Expose les opérations produit et leurs états à l'interface vendeur.
 class ProductCubit extends Cubit<ProductState> {
   final ProductRepository productRepository;
   final AddProductUseCase addProductUseCase;
@@ -28,6 +29,7 @@ class ProductCubit extends Cubit<ProductState> {
     required List<ProductInventoryOptionEntity> inventoryOptions,
     File? imageFile,
   }) async {
+    // Les états exposés permettent à l'écran vendeur de suivre l'enregistrement.
     emit(ProductLoading());
     try {
       final newProduct = ProductEntity(

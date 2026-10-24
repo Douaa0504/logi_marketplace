@@ -32,6 +32,7 @@ void main() {
     });
 
     test('loads persisted IDs and their products', () async {
+      // Les IDs persistés doivent être résolus en produits présentables par l'UI.
       favoritesRepository.productIds.add(product.id);
 
       await cubit.loadFavorites();

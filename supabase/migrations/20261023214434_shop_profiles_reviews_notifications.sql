@@ -54,6 +54,7 @@ DROP POLICY IF EXISTS product_reviews_select_public ON public.product_reviews;
 DROP POLICY IF EXISTS product_reviews_insert_buyer ON public.product_reviews;
 DROP POLICY IF EXISTS product_reviews_update_buyer ON public.product_reviews;
 DROP POLICY IF EXISTS product_reviews_delete_buyer ON public.product_reviews;
+-- La policy autorise la lecture ; la vue publique contrôle les champs exposés.
 CREATE POLICY product_reviews_select_public ON public.product_reviews
   FOR SELECT USING (true);
 CREATE POLICY product_reviews_insert_buyer ON public.product_reviews
@@ -103,6 +104,7 @@ BEFORE UPDATE ON public.product_reviews
 FOR EACH ROW
 EXECUTE FUNCTION public.prevent_review_identity_changes();
 
+-- La vue expose le contenu des avis sans publier l'identifiant du Buyer.
 CREATE OR REPLACE VIEW public.product_reviews_public
   WITH (security_barrier = true) AS
 SELECT

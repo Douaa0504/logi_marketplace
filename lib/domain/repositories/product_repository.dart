@@ -2,6 +2,7 @@ import 'dart:io';
 
 import '../entities/product_entity.dart';
 
+/// Contrat d'accès aux produits et à l'inventaire pour les couches métier.
 abstract class ProductRepository {
   Future<List<ProductEntity>> getProducts();
   Future<List<ProductEntity>> getProductsBySeller(String sellerId);

@@ -59,6 +59,7 @@ void main() {
   testWidgets(
     'tabs preserve cart and favorite state and settings toggle theme',
     (tester) async {
+      // Le passage entre onglets ne doit pas réinitialiser les états partagés.
       favoritesRepository.productIds.add(product.id);
       CartService().addToCart(product);
 

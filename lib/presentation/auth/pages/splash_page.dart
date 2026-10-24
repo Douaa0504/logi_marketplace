@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/navigation/app_router.dart';
 import '../../../domain/repositories/auth_repository.dart';
 
+/// Vérifie la session et redirige vers l'espace correspondant au rôle du compte.
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 

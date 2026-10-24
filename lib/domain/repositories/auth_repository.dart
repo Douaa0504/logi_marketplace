@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// Contrat des opérations d'authentification consommées par le domaine.
 abstract class AuthRepository {
   Future<AuthResponse> signUp({
     required String email,

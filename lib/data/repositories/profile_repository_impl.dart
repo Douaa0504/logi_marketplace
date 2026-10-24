@@ -4,6 +4,7 @@ import '../../domain/entities/shop_profile_entity.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../datasources/profile_remote_datasource.dart';
 
+/// Convertit les réponses du datasource de profil en Entities du domaine.
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource remoteDataSource;
 

@@ -12,6 +12,7 @@ class BuyerNavigationPage extends StatefulWidget {
 }
 
 class _BuyerNavigationPageState extends State<BuyerNavigationPage> {
+  // Les pages restent montées pour conserver le panier et les filtres en changeant d'onglet.
   int _selectedIndex = 0;
 
   late final List<Widget> _pages = [

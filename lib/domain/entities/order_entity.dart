@@ -1,3 +1,4 @@
+/// Informations d'une commande présentées dans l'espace vendeur.
 class OrderEntity {
   final String id;
   final String buyerId;

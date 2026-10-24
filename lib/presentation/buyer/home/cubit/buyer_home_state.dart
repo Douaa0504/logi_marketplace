@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import '../../../../domain/entities/product_entity.dart';
 
+/// États affichés par l'accueil selon le chargement et les filtres actifs.
 @immutable
 abstract class BuyerHomeState extends Equatable {
   const BuyerHomeState();

@@ -8,6 +8,7 @@ import '../../presentation/buyer/navigation/buyer_navigation_page.dart';
 import '../../presentation/seller/dashboard/seller_dashboard_page.dart';
 
 class AppRouter {
+  /// Oriente l'utilisateur selon le rôle récupéré depuis son profil Supabase.
   static Future<void> routeUser(BuildContext context) async {
     final auth = Supabase.instance.client.auth;
 
@@ -17,6 +18,7 @@ class AppRouter {
     }
 
     final role = await context.read<AuthRepository>().getUserRole();
+    // La récupération du rôle est asynchrone : le contexte peut avoir été démonté.
     if (!context.mounted) return;
 
     await AppStorage().saveUserRole(role);
