@@ -9,10 +9,17 @@ import 'package:logi_marketplace/core/theme/theme_cubit.dart';
 
 // Auth Layer
 import 'package:logi_marketplace/data/datasources/auth_remote_datasource.dart';
+import 'package:logi_marketplace/data/datasources/profile_remote_datasource.dart';
 import 'package:logi_marketplace/data/repositories/auth_repository_impl.dart';
+import 'package:logi_marketplace/data/repositories/profile_repository_impl.dart';
 import 'package:logi_marketplace/data/repositories/supabase_favorites_repository.dart';
+import 'package:logi_marketplace/data/repositories/supabase_notification_repository.dart';
+import 'package:logi_marketplace/data/repositories/supabase_review_repository.dart';
 import 'package:logi_marketplace/domain/repositories/auth_repository.dart';
 import 'package:logi_marketplace/domain/repositories/favorites_repository.dart';
+import 'package:logi_marketplace/domain/repositories/notification_repository.dart';
+import 'package:logi_marketplace/domain/repositories/profile_repository.dart';
+import 'package:logi_marketplace/domain/repositories/review_repository.dart';
 import 'package:logi_marketplace/domain/usecases/sign_in_usecase.dart';
 import 'package:logi_marketplace/domain/usecases/sign_up_usecase.dart';
 import 'package:logi_marketplace/presentation/auth/cubit/auth_cubit.dart';
@@ -70,6 +77,14 @@ class LogiMarketplaceApp extends StatelessWidget {
       remoteDataSource: productDataSource,
     );
     final favoritesRepository = SupabaseFavoritesRepository(supabaseClient);
+    final reviewRepository = SupabaseReviewRepository(supabaseClient);
+    final notificationRepository = SupabaseNotificationRepository(supabaseClient);
+    final profileRemoteDataSource = ProfileRemoteDataSource(
+      supabaseClient: supabaseClient,
+    );
+    final profileRepository = ProfileRepositoryImpl(
+      remoteDataSource: profileRemoteDataSource,
+    );
     final addProductUseCase = AddProductUseCase(productRepository);
     final updateProductUseCase = UpdateProductUseCase(productRepository);
     final lightColorScheme = ColorScheme.fromSeed(
@@ -90,6 +105,11 @@ class LogiMarketplaceApp extends StatelessWidget {
         RepositoryProvider<FavoritesRepository>.value(
           value: favoritesRepository,
         ),
+        RepositoryProvider<ReviewRepository>.value(value: reviewRepository),
+        RepositoryProvider<NotificationRepository>.value(
+          value: notificationRepository,
+        ),
+        RepositoryProvider<ProfileRepository>.value(value: profileRepository),
       ],
       child: MultiBlocProvider(
         providers: [

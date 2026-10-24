@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../data/repositories/order_repository_impl.dart';
 import '../../../domain/entities/order_entity.dart';
+import 'seller_notifications_action.dart';
 
 class SellerOrdersPage extends StatefulWidget {
   const SellerOrdersPage({super.key});
@@ -99,6 +100,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
         elevation: 0,
         centerTitle: true,
         actions: [
+          const SellerNotificationsAction(),
           IconButton(icon: const Icon(Icons.refresh), onPressed: _fetchOrders),
         ],
       ),

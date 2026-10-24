@@ -55,6 +55,11 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
+  Future<List<ProductEntity>> getProductsBySeller(String sellerId) async {
+    return remoteDataSource.getProductsBySeller(sellerId);
+  }
+
+  @override
   Future<Map<String, dynamic>> getSellerProductInventory(
     String productId,
   ) {

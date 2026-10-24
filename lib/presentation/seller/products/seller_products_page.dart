@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../domain/entities/product_entity.dart';
+import '../../../domain/entities/review_entity.dart';
+import '../../../domain/repositories/review_repository.dart';
 import '../../auth/cubit/product_cubit.dart';
 import '../../auth/cubit/product_state.dart';
 import '../../auth/pages/add_product_page.dart';
@@ -198,53 +200,63 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   color: Theme.of(context).colorScheme.surface,
-                  child: ListTile(
-                    leading: product.remoteImageUrl != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              product.remoteImageUrl!,
-                              width: 50,
-                              height: 50,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, _, _) =>
-                                  const Icon(Icons.image_not_supported),
-                            ),
-                          )
-                        : const Icon(Icons.shopping_bag, size: 40),
-                    title: Text(
-                      product.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      '${product.category} • \$${product.price.toStringAsFixed(2)}\n'
-                      '${product.createdAt.toString().split(' ')[0]}\n'
-                      '${_favoriteCountsError != null ? 'Favorites unavailable' : _isLoadingFavoriteCounts ? 'Loading favorites…' : '${favoriteCount ?? 0} favorites'}',
-                    ),
-                    isThreeLine: true,
-                    trailing: deleting
-                        ? const SizedBox.square(
-                            dimension: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Wrap(
-                            spacing: 0,
-                            children: [
-                              IconButton(
-                                tooltip: 'Edit product',
-                                icon: const Icon(Icons.edit_outlined),
-                                onPressed: () => _editProduct(context, product),
-                              ),
-                              IconButton(
-                                tooltip: 'Delete product',
-                                icon: Icon(
-                                  Icons.delete_outline,
-                                  color: Theme.of(context).colorScheme.error,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: product.remoteImageUrl != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  product.remoteImageUrl!,
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, _, _) =>
+                                      const Icon(Icons.image_not_supported),
                                 ),
-                                onPressed: () => _deleteProduct(product),
+                              )
+                            : const Icon(Icons.shopping_bag, size: 40),
+                        title: Text(
+                          product.title,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          '${product.category} • \$${product.price.toStringAsFixed(2)}\n'
+                          '${product.createdAt.toString().split(' ')[0]}\n'
+                          '${_favoriteCountsError != null ? 'Favorites unavailable' : _isLoadingFavoriteCounts ? 'Loading favorites…' : '${favoriteCount ?? 0} favorites'}',
+                        ),
+                        isThreeLine: true,
+                        trailing: deleting
+                            ? const SizedBox.square(
+                                dimension: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Wrap(
+                                spacing: 0,
+                                children: [
+                                  IconButton(
+                                    tooltip: 'Edit product',
+                                    icon: const Icon(Icons.edit_outlined),
+                                    onPressed: () =>
+                                        _editProduct(context, product),
+                                  ),
+                                  IconButton(
+                                    tooltip: 'Delete product',
+                                    icon: Icon(
+                                      Icons.delete_outline,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.error,
+                                    ),
+                                    onPressed: () => _deleteProduct(product),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                      ),
+                      _SellerProductReviews(productId: product.id),
+                    ],
                   ),
                 );
               },
@@ -254,6 +266,97 @@ class _SellerProductsPageState extends State<SellerProductsPage> {
           return const SizedBox.shrink();
         },
       ),
+    );
+  }
+}
+
+class _SellerProductReviews extends StatefulWidget {
+  final String productId;
+
+  const _SellerProductReviews({required this.productId});
+
+  @override
+  State<_SellerProductReviews> createState() => _SellerProductReviewsState();
+}
+
+class _SellerProductReviewsState extends State<_SellerProductReviews> {
+  List<ReviewEntity> _reviews = const [];
+  bool _isLoading = false;
+  bool _hasLoaded = false;
+  String? _error;
+
+  Future<void> _loadReviews() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final reviews = await context
+          .read<ReviewRepository>()
+          .getProductReviews(widget.productId);
+      if (!mounted) return;
+      setState(() {
+        _reviews = reviews;
+        _hasLoaded = true;
+        _isLoading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _error = error.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final averageRating = _reviews.isEmpty
+        ? 0.0
+        : _reviews.fold<int>(0, (sum, review) => sum + review.rating) /
+              _reviews.length;
+    return ExpansionTile(
+      title: Text(
+        _hasLoaded
+            ? 'Reviews (${_reviews.length}) • ${averageRating.toStringAsFixed(1)}/5'
+            : 'Reviews and ratings',
+      ),
+      onExpansionChanged: (expanded) {
+        if (expanded && !_hasLoaded && !_isLoading) _loadReviews();
+      },
+      children: [
+        if (_isLoading)
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (_error != null)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Text(
+                  'Reviews could not be loaded.',
+                  style: TextStyle(color: colors.error),
+                ),
+                TextButton(
+                  onPressed: _loadReviews,
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          )
+        else if (_reviews.isEmpty)
+          const ListTile(title: Text('No reviews yet.'))
+        else
+          ..._reviews.map(
+            (review) => ListTile(
+              title: Text('${review.rating}/5'),
+              subtitle: Text(review.reviewText),
+            ),
+          ),
+      ],
     );
   }
 }

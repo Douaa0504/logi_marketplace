@@ -80,6 +80,9 @@ class _FakeProductRepository implements ProductRepository {
   Future<List<ProductEntity>> getProducts() async => [];
 
   @override
+  Future<List<ProductEntity>> getProductsBySeller(String sellerId) async => [];
+
+  @override
   Future<Map<String, dynamic>> getSellerProductInventory(
     String productId,
   ) async => {};

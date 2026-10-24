@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logi_marketplace/data/services/cart_service.dart';
+import 'package:logi_marketplace/domain/entities/review_entity.dart';
+import 'package:logi_marketplace/domain/repositories/review_repository.dart';
 import 'package:logi_marketplace/presentation/auth/pages/cart_page.dart';
 import '../../../../domain/entities/product_entity.dart';
 import '../../../../domain/entities/product_inventory_option_entity.dart';
 import '../../../shared/primary_button.dart';
 import '../../../shared/favorite_button.dart';
+import '../../../shared/public_shop_page.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final ProductEntity product;
@@ -17,8 +21,19 @@ class ProductDetailsPage extends StatefulWidget {
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
   ProductInventoryOptionEntity? _selectedOption;
+  final TextEditingController _reviewController = TextEditingController();
+  final List<ReviewEntity> _reviews = [];
+  int _selectedRating = 5;
+  bool _isLoadingReviews = false;
+  bool _isSubmittingReview = false;
+  bool _isDeletingReview = false;
+  String? _reviewLoadError;
 
   ProductEntity get product => widget.product;
+  double get _averageRating => _reviews.isEmpty
+      ? 0
+      : _reviews.fold<int>(0, (sum, review) => sum + review.rating) /
+            _reviews.length;
 
   bool get _canAddToCart {
     if (product.inventoryMode == 'simple') {
@@ -34,6 +49,136 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         _selectedOption != null &&
         _selectedOption!.isAvailable &&
         _selectedOption!.isInStock;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReviews();
+  }
+
+  Future<void> _loadReviews() async {
+    final repo = context.read<ReviewRepository>();
+    setState(() => _isLoadingReviews = true);
+    try {
+      final reviews = await repo.getProductReviews(product.id);
+      if (!mounted) return;
+      setState(() {
+        _reviews
+          ..clear()
+          ..addAll(reviews);
+        _reviewLoadError = null;
+      });
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _reviewLoadError = error.toString();
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _isLoadingReviews = false);
+    }
+  }
+
+  Future<void> _submitReview() async {
+    final text = _reviewController.text.trim();
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Write a review before submitting.')),
+      );
+      return;
+    }
+    if (text.length > 2000) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reviews must be 2,000 characters or fewer.')),
+      );
+      return;
+    }
+
+    if (_reviews.any((review) => review.isMine)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You have already reviewed this product.')),
+      );
+      return;
+    }
+
+    final repo = context.read<ReviewRepository>();
+    setState(() => _isSubmittingReview = true);
+    try {
+      await repo.submitReview(
+        productId: product.id,
+        rating: _selectedRating,
+        reviewText: text,
+      );
+      _reviewController.clear();
+      await _loadReviews();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Review submitted.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.toString())),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmittingReview = false);
+    }
+  }
+
+  Future<void> _deleteReview(ReviewEntity review) async {
+    if (!review.isMine || _isDeletingReview) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete your review?'),
+        content: const Text('This review will be permanently removed.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isDeletingReview = true);
+    try {
+      await context.read<ReviewRepository>().deleteReview(review.id);
+      if (!mounted) return;
+      setState(() {
+        _reviews.removeWhere((item) => item.id == review.id);
+      });
+      await _loadReviews();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _reviewLoadError == null
+                ? 'Review deleted.'
+                : 'Review deleted, but the reviews could not be refreshed.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not delete review: $error')),
+      );
+    } finally {
+      if (mounted) setState(() => _isDeletingReview = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
   }
 
   @override
@@ -67,7 +212,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                           height: 1.6,
                         ),
                       ),
-                      const SizedBox(height: 120), // Bottom bar spacing
+                      const SizedBox(height: 24),
+                      _buildReviewsSection(context),
+                      const SizedBox(height: 120),
                     ],
                   ),
                 ),
@@ -226,9 +373,163 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         ),
         const SizedBox(height: 12),
         Text(
-          'Reviews are not available yet.',
+          _reviews.isEmpty
+              ? 'No reviews yet.'
+              : '${_averageRating.toStringAsFixed(1)}/5 • '
+                    '${_reviews.length} review${_reviews.length == 1 ? '' : 's'}',
           style: TextStyle(color: colors.onSurfaceVariant, fontSize: 13),
         ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PublicShopPage(
+                sellerId: product.sellerId,
+                onProductTap: (shopProduct) => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ProductDetailsPage(product: shopProduct),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          icon: const Icon(Icons.storefront_outlined),
+          label: const Text('Visit Shop'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReviewsSection(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle(context, 'Customer Reviews'),
+        const SizedBox(height: 12),
+        if (_isLoadingReviews)
+          const Center(child: CircularProgressIndicator())
+        else if (_reviewLoadError != null)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Reviews could not be loaded.',
+                style: TextStyle(color: colors.error),
+              ),
+              TextButton.icon(
+                onPressed: _loadReviews,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+              ),
+            ],
+          )
+        else if (_reviews.isEmpty)
+          const Text('No reviews yet. Be the first to leave feedback.')
+        else ...[
+          ..._reviews.map(
+            (review) => Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        review.buyerDisplayName ?? 'Buyer',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${review.rating}/5',
+                        style: TextStyle(color: colors.primary),
+                      ),
+                      if (review.isMine)
+                        IconButton(
+                          tooltip: 'Delete your review',
+                          onPressed: _isDeletingReview
+                              ? null
+                              : () => _deleteReview(review),
+                          icon: const Icon(Icons.delete_outline),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(review.reviewText),
+                  const SizedBox(height: 6),
+                  Text(
+                    review.createdAt.toLocal().toString().split('.').first,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 18),
+        if (_reviews.any((review) => review.isMine))
+          Text(
+            'You have already reviewed this product.',
+            style: TextStyle(color: colors.onSurfaceVariant),
+          )
+        else ...[
+          Text(
+            'Write a review',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: colors.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: List.generate(5, (index) {
+              final value = index + 1;
+              return IconButton(
+                onPressed: () => setState(() => _selectedRating = value),
+                icon: Icon(
+                  value <= _selectedRating ? Icons.star : Icons.star_border,
+                  color: colors.primary,
+                ),
+              );
+            }),
+          ),
+          TextFormField(
+            controller: _reviewController,
+            maxLines: 4,
+            maxLength: 2000,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Share your feedback about this product',
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isSubmittingReview ? null : _submitReview,
+              child: _isSubmittingReview
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Submit Review'),
+            ),
+          ),
+        ],
       ],
     );
   }

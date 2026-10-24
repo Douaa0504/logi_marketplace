@@ -9,6 +9,8 @@ import 'package:logi_marketplace/domain/entities/product_entity.dart';
 import 'package:logi_marketplace/domain/entities/product_inventory_option_entity.dart';
 import 'package:logi_marketplace/domain/repositories/favorites_repository.dart';
 import 'package:logi_marketplace/domain/repositories/product_repository.dart';
+import 'package:logi_marketplace/domain/repositories/review_repository.dart';
+import 'package:logi_marketplace/domain/entities/review_entity.dart';
 import 'package:logi_marketplace/presentation/auth/pages/cart_page.dart';
 import 'package:logi_marketplace/presentation/buyer/favorites/favorites_cubit.dart';
 import 'package:logi_marketplace/presentation/buyer/navigation/buyer_navigation_page.dart';
@@ -130,17 +132,20 @@ Widget _buildApp(
 ) {
   return RepositoryProvider<ProductRepository>.value(
     value: productRepository,
-    child: MultiBlocProvider(
-      providers: [
-        BlocProvider<FavoritesCubit>.value(value: favoritesCubit),
-        BlocProvider<ThemeCubit>.value(value: themeCubit),
-      ],
-      child: BlocBuilder<ThemeCubit, ThemeMode>(
-        builder: (context, themeMode) => MaterialApp(
-          themeMode: themeMode,
-          theme: ThemeData.light(),
-          darkTheme: ThemeData.dark(),
-          home: const BuyerNavigationPage(),
+    child: RepositoryProvider<ReviewRepository>.value(
+      value: _FakeReviewRepository(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<FavoritesCubit>.value(value: favoritesCubit),
+          BlocProvider<ThemeCubit>.value(value: themeCubit),
+        ],
+        child: BlocBuilder<ThemeCubit, ThemeMode>(
+          builder: (context, themeMode) => MaterialApp(
+            themeMode: themeMode,
+            theme: ThemeData.light(),
+            darkTheme: ThemeData.dark(),
+            home: const BuyerNavigationPage(),
+          ),
         ),
       ),
     ),
@@ -154,6 +159,10 @@ class _FakeProductRepository implements ProductRepository {
 
   @override
   Future<List<ProductEntity>> getProducts() async => [product];
+
+  @override
+  Future<List<ProductEntity>> getProductsBySeller(String sellerId) async =>
+      [product].where((item) => item.sellerId == sellerId).toList();
 
   @override
   Future<Map<String, dynamic>> getSellerProductInventory(
@@ -171,6 +180,28 @@ class _FakeProductRepository implements ProductRepository {
 
   @override
   Future<void> updateProduct(ProductEntity product, [File? imageFile]) async {}
+}
+
+class _FakeReviewRepository implements ReviewRepository {
+  @override
+  Future<List<ReviewEntity>> getProductReviews(String productId) async => [];
+
+  @override
+  Future<ReviewEntity> submitReview({
+    required String productId,
+    required int rating,
+    required String reviewText,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<void> updateReview({
+    required String reviewId,
+    required int rating,
+    required String reviewText,
+  }) async {}
+
+  @override
+  Future<void> deleteReview(String reviewId) async {}
 }
 
 class _FakeFavoritesRepository implements FavoritesRepository {

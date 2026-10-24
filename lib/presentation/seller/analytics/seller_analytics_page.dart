@@ -48,6 +48,7 @@ class _SellerAnalyticsPageState extends State<SellerAnalyticsPage> {
           .eq('seller_id', currentUserId);
 
       final productsCount = (productsResponse as List).length;
+      // ignore: use_build_context_synchronously
       final favoriteSummary = await context
           .read<ProductCubit>()
           .getSellerFavoriteCounts();
