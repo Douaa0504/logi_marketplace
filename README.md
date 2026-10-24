@@ -1,4 +1,4 @@
-# Logi Marketplace
+# Logi Marketplace 🛍️
 
 A Flutter-based multi-vendor marketplace for Buyers and Sellers, built around a clean domain/data/presentation architecture and backed by Supabase for authentication, product data, storage, and role-aware access control.
 
@@ -223,7 +223,7 @@ This architecture is reflected directly in the repository layout and the depende
 
 ---
 
-## Project Structure
+## 📂Project Structure
 
 ```text
 .
@@ -313,7 +313,7 @@ flutter test
 
 ---
 
-## Security and Data Access Notes
+## 🔐Security and Data Access Notes
 
 The codebase is built around Supabase and includes migration files under `supabase/migrations/` to scope access to buyer, seller, and review-related workflows. The app uses authenticated sessions to restrict actions such as:
 
@@ -326,7 +326,7 @@ These rules are not enforced only at the UI layer; the repository code and the S
 
 ---
 
-## Notes
+## 📝Notes 
 
 - This repository contains the Flutter client and its Supabase integration for a multi-vendor marketplace flow.
 - The app architecture is intentionally layered and easy to extend for additional catalog, order, or seller features.
@@ -334,7 +334,7 @@ These rules are not enforced only at the UI layer; the repository code and the S
 
 ---
 
-## License
+## 📄 License 
 
 Copyright © 2026 Douaa ERRAMI.
 
